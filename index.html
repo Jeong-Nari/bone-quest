@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="뼈 재건 원정대">
+<meta name="apple-mobile-web-app-title" content="본 어드벤처">
 <meta name="theme-color" content="#E6ECF1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D131A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23161F29'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='%23E3B45C' font-family='sans-serif' font-weight='bold'%3E骨%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="./icon-192.png">
 <style>html,body{background:#E6ECF1}@media (prefers-color-scheme:dark){html,body{background:#0D131A}}</style>
-<title>뼈 재건 원정대</title>
+<title>본 어드벤처</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -52,8 +52,8 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .hud{position:sticky;top:0;z-index:20;background:var(--ground);padding:14px 0 10px;
   border-bottom:1px solid var(--line-soft)}
 .hud-top{display:flex;align-items:center;gap:12px}
-.crest{width:52px;height:52px;flex:none;border-radius:14px;background:var(--surface);
-  border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow)}
+.crest{width:52px;height:52px;flex:none;border-radius:14px;background:#161F29;
+  border:1px solid #2B3846;display:grid;place-items:center;box-shadow:var(--shadow)}
 .crest span{font-family:"Black Han Sans",sans-serif;font-size:26px;line-height:1;color:var(--gold)}
 .hud-meta{flex:1;min-width:0}
 .hud-title{display:flex;align-items:baseline;gap:7px}
@@ -89,8 +89,8 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .q[aria-pressed="true"] .box svg{opacity:1;transform:scale(1)}
 .q[aria-pressed="true"] .qname{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--line)}
 .qbody{flex:1;min-width:0}
-.qname{font-weight:600;font-size:14.5px;letter-spacing:-.01em}
-.qdesc{font-size:12px;color:var(--ink2);margin-top:2px}
+.qname{display:block;font-weight:600;font-size:14.7px;letter-spacing:-.01em;line-height:1.35}
+.qdesc{display:block;font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.5}
 .tag{flex:none;font-size:10px;letter-spacing:.08em;font-weight:600;color:var(--c);
   border:1px solid color-mix(in srgb,var(--c) 35%, transparent);
   background:color-mix(in srgb,var(--c) 10%, transparent);
@@ -98,7 +98,16 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 
 /* boss */
 .boss{padding:14px}
-.boss-top{display:flex;align-items:center;gap:10px}
+.boss-top{display:flex;align-items:center;gap:11px}
+.bossart{width:58px;height:58px;flex:none;image-rendering:pixelated;image-rendering:crisp-edges}
+@keyframes bob{0%,49%{transform:translateY(0)}50%,100%{transform:translateY(-3px)}}
+@keyframes sway{0%,49%{transform:translateX(0)}50%,100%{transform:translateX(2px)}}
+.bossart.alive{animation:bob 1.1s infinite}
+.bossart.final{animation:sway 2.4s infinite}
+.bossart.down{opacity:.85}
+.boss-name{display:block}
+.boss-flavor{display:block;font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.4}
+.crest img{width:34px;height:34px;image-rendering:pixelated}
 .boss-name{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:16px}
 .boss-hp{margin-top:10px;height:14px;border-radius:5px;background:var(--surface2);border:1px solid var(--line);
   overflow:hidden;position:relative}
@@ -116,10 +125,10 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .glyph{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;
   font-family:"Black Han Sans",sans-serif;font-size:17px;color:var(--c);
   background:color-mix(in srgb,var(--c) 12%, transparent);border:1px solid color-mix(in srgb,var(--c) 30%, transparent)}
-.statmeta{flex:1;min-width:0}
-.statname{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2);margin-bottom:5px}
+.statmeta{display:block;flex:1;min-width:0}
+.statname{display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;color:var(--ink2);margin-bottom:6px}
 .statname b{color:var(--ink);font-weight:600}
-.track{height:7px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.track{display:block;height:7px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
 .track i{display:block;height:100%;background:var(--c);transition:width .4s}
 
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
@@ -170,7 +179,7 @@ details[open] summary .chev{transform:rotate(90deg)}
 <div class="app">
   <header class="hud">
     <div class="hud-top">
-      <div class="crest"><span>骨</span></div>
+      <div class="crest"><img id="crestImg" alt="" width="34" height="34"></div>
       <div class="hud-meta">
         <div class="hud-title"><b id="lvNum">Lv.1</b><span class="lv" id="chapter">CHAPTER 1</span></div>
         <div class="hud-sub"><span id="todayLabel">—</span><span class="dot"></span><span id="streak">연속 0일</span></div>
@@ -194,7 +203,11 @@ details[open] summary .chev{transform:rotate(90deg)}
     <div class="sec-head" style="margin-top:18px"><h2>이번 주 보스</h2></div>
     <div class="card boss" style="margin-top:10px">
       <div class="boss-top">
-        <span class="boss-name">주간 보스 · 관성(慣性)</span>
+        <img class="bossart alive" id="bossImg" alt="주간 보스" width="58" height="58">
+        <span style="min-width:0">
+          <span class="boss-name">관성(慣性)</span>
+          <span class="boss-flavor">움직이지 않으려는 힘. 매주 되살아난다.</span>
+        </span>
         <span class="num" style="margin-left:auto;font-size:12px;color:var(--ink2)" id="bossHpTxt">HP 5 / 5</span>
       </div>
       <div class="boss-hp"><i id="bossFill" style="width:100%"></i></div>
@@ -230,7 +243,11 @@ details[open] summary .chev{transform:rotate(90deg)}
     <div class="sec-head" style="margin-top:18px"><h2>최종 보스</h2></div>
     <div class="card boss" style="margin-top:10px">
       <div class="boss-top">
-        <span class="boss-name">2027.08 골밀도 재검사</span>
+        <img class="bossart final" id="skullImg" alt="최종 보스" width="58" height="58">
+        <span style="min-width:0">
+          <span class="boss-name">골왕(骨王)</span>
+          <span class="boss-flavor">2027.08 골밀도 재검사</span>
+        </span>
         <span class="num" style="margin-left:auto;font-size:12px;color:var(--nut)" id="dday">D-0</span>
       </div>
       <p class="note" style="margin:9px 0 0;padding:0">검진 소견의 <b>12개월 후 추적검사</b>가 이 원정의 결말입니다. 목표는 골밀도 유지 이상, 그리고 근육량 표준.</p>
@@ -252,6 +269,7 @@ details[open] summary .chev{transform:rotate(90deg)}
 <div class="toast" id="toast"></div>
 
 <script>
+const SPRITE={bone:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAA80lEQVR42mNkIBPISQj9h7EfvXjHyEBNICch9P/Di2twjGwZOmAix/BLF46giF26cIQBlyVMDDQGZFlw5dxRDDFcvmAkNw6Wzetk0DGyxpDTM7BBiXhGSiIaPS7QLXr04h0jIy0MR7aEKqkIW5yQFcm4DI9KKsewBMZnpIbhj168Y4RFPAzAxBmpYTi+4oORUNlCrOFklS3o4h9eXPt/ZNtsvGUPRkbDleT0DGwYKHY5vlREDcPhFuBLx5QYDo9k5CSGq3wht1LBSEX4CjGyfUBKSUlWHCCDRy/eMUYlldO+wsFVtlAcROhBhV62UM0CajVNAIdK2asOtNsyAAAAAElFTkSuQmCC",slime:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAA1UlEQVR42mNgGAXDHjASq1BJyuI/Mv/esxOMVLEAZnCkx0QU8eU78omyiJGQ4egGo4PlO/LxWsJEieEwn6EHH0EfIBuuqiUPF7997SHJPmGihuH4fMJETEogZDjRkYwe7lduH4azdVRtUTTikkMPKhZ8tp++Po3h6eu7DNKiyhgW4JMjKYikRZXJkiPKB4l+y8mSw+oDQukeOcyR2YRSEwuxqUFH1RZuML4wJymIsFlCKmBioDFghIW/rnIIVQ2+fHcNw71nJxjp4wNsFQqlgNgKiWIAADRJYXQ2TFulAAAAAElFTkSuQmCC",slimeDown:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAiklEQVR42mNgGAWjYBSMglFAOWDEJaEkZfGfFIPuPTuB1SwWXAbrKoeQ6tj/2CxiRDecDINRwOW7a1AsYcJn+Onr01BodIBNXlc5BCV4GQm5/PT1aQymmlk4XYxLHuYTJnzehWnG5wN88gwMDAyMSlIW/6VEDGmSRJ+9Oc/ARJd8QGqapzRvUBUAAApUPaSWrYz8AAAAAElFTkSuQmCC",skull:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABVklEQVR42mNgGAV4gJyE0H85CaH/tJInaPnjLTH/H2+JwWoIpfIwwEKMY47O8WKwTtn2H12MWHl8gBGX77EZ8H/6PYimTCWshuGTt07ZxvDoxTtGskIA7locFhMrT1IUHD11hS4JnRFfImRgYGC4dOEIRRboGdgwMDAwYA1+BgYGBiZ8mim1nBgzmHD5nhqWIzsCV1ZkGujCjqhcoKXjgyF27coWktWQ7QAGBgaGGpF/cHbLGyay1ZDtgJY3TAwnzCUYLE6+oEgNWWkAFpQwg7EFLTFqKAoBYgwk1lKiQuDKuaNEJU5siY8Us7A64NGLd4xRSeV4NSJbjM8RV84dZYhKKsdZEjISahMsm9fJoGNkTVYeJ2Q5QQdQWirqGdjgtZyskhA96ImNCoocQEyCJFcPwWwITZD/l83rxGk4Mh/GJhT3RKcB9PYBsYAYy0fBKBgFgwIAADKbuUDx49efAAAAAElFTkSuQmCC"};
 const STATS={bone:{n:"골밀도",g:"骨",v:"--bone"},str:{n:"근력",g:"筋",v:"--str"},
   flex:{n:"유연성",g:"柔",v:"--flex"},sta:{n:"지구력",g:"持",v:"--sta"},nut:{n:"영양",g:"養",v:"--nut"}};
 
@@ -259,7 +277,7 @@ const ROUTINE={
  0:{kind:"리커버리",why:"쉬는 것도 루틴",items:[
    {t:"전신 스트레칭 10분",d:"목·가슴·허벅지 뒤·종아리 순서로",s:"flex"},
    {t:"산책 20분",d:"밖에서 걸으면 햇빛 퀘스트도 같이 깸",s:"sta"}]},
- 1:{kind:"하체 기둥",why:"대퇴골 −2.2 공략",items:[
+ 1:{kind:"하체 기둥",why:"대퇴골 공략",items:[
    {t:"캣카우 + 힙 서클 2분",d:"굳은 골반부터 풀고 시작",s:"flex"},
    {t:"의자 스쿼트 12회 × 3",d:"의자에 살짝 닿았다 일어나기. 무릎이 안쪽으로 모이지 않게",s:"str"},
    {t:"힙 브릿지 15회 × 3",d:"엉덩이로 밀어 올리기. 허리로 젖히지 않기",s:"str"},
@@ -270,7 +288,7 @@ const ROUTINE={
    {t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
    {t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
    {t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]},
- 3:{kind:"상체 & 코어",why:"요추 −2.1 지지",items:[
+ 3:{kind:"상체 & 코어",why:"요추 지지",items:[
    {t:"어깨 워밍업 2분",d:"팔 크게 돌리기 · 수건 잡고 위로 넘기기",s:"flex"},
    {t:"무릎 푸시업 8~12회 × 3",d:"힘들면 벽 푸시업부터",s:"str"},
    {t:"수건 로우 12회 × 3",d:"수건 양끝 당기며 날개뼈 모으기",s:"str"},
@@ -406,6 +424,9 @@ function render(){
   const hp=Math.max(0,5-cleared);
   document.getElementById("bossFill").style.width=(hp/5*100)+"%";
   document.getElementById("bossHpTxt").textContent=hp?`HP ${hp} / 5`:"처치 완료";
+  const bi=document.getElementById("bossImg");
+  bi.src=hp?SPRITE.slime:SPRITE.slimeDown;
+  bi.className="bossart "+(hp?"alive":"down");
 
   // week tab
   const wl=document.getElementById("weekList");wl.innerHTML="";
@@ -443,6 +464,8 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{
   ["today","week","stats"].forEach(t=>document.getElementById("tab-"+t).hidden=(t!==b.dataset.tab));
   window.scrollTo({top:0,behavior:"instant"});
 });
+document.getElementById("crestImg").src=SPRITE.bone;
+document.getElementById("skullImg").src=SPRITE.skull;
 document.getElementById("reset").onclick=()=>{S={log:{}};save();render();toast("기록을 비웠습니다")};
 render();
 </script>
