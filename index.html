@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="뼈 재건 원정대">
+<meta name="theme-color" content="#E6ECF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D131A" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23161F29'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='%23E3B45C' font-family='sans-serif' font-weight='bold'%3E骨%3C/text%3E%3C/svg%3E">
+<style>html,body{background:#E6ECF1}@media (prefers-color-scheme:dark){html,body{background:#0D131A}}</style>
+<title>뼈 재건 원정대</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#E6ECF1; --surface:#FFFFFF; --surface2:#F1F5F9; --line:#D2DBE4; --line-soft:#E4EAF0;
+  --ink:#121C26; --ink2:#4C5D6C; --ink3:#7E8D9B;
+  --bone:#0F7C78; --str:#A9781F; --flex:#6248BE; --sta:#2F68B0; --nut:#B44228;
+  --gold:#A9781F; --gold-fill:#F0E4C8;
+  --shadow:0 1px 2px rgba(18,28,38,.06), 0 6px 18px rgba(18,28,38,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D131A; --surface:#161F29; --surface2:#1D2734; --line:#2B3846; --line-soft:#222D3A;
+    --ink:#E9EFF5; --ink2:#A2B2C1; --ink3:#6E8090;
+    --bone:#3FBEB3; --str:#E3B45C; --flex:#A08CF2; --sta:#69A6EE; --nut:#EE8163;
+    --gold:#E3B45C; --gold-fill:#3A3016;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D131A; --surface:#161F29; --surface2:#1D2734; --line:#2B3846; --line-soft:#222D3A;
+  --ink:#E9EFF5; --ink2:#A2B2C1; --ink3:#6E8090;
+  --bone:#3FBEB3; --str:#E3B45C; --flex:#A08CF2; --sta:#69A6EE; --nut:#EE8163;
+  --gold:#E3B45C; --gold-fill:#3A3016;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.app{max-width:460px;margin:0 auto;padding:0 14px 96px;display:flex;flex-direction:column;gap:14px}
+
+/* HUD */
+.hud{position:sticky;top:0;z-index:20;background:var(--ground);padding:14px 0 10px;
+  border-bottom:1px solid var(--line-soft)}
+.hud-top{display:flex;align-items:center;gap:12px}
+.crest{width:52px;height:52px;flex:none;border-radius:14px;background:var(--surface);
+  border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow)}
+.crest span{font-family:"Black Han Sans",sans-serif;font-size:26px;line-height:1;color:var(--gold)}
+.hud-meta{flex:1;min-width:0}
+.hud-title{display:flex;align-items:baseline;gap:7px}
+.hud-title b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:20px;letter-spacing:.01em}
+.hud-title .lv{font-size:11px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase}
+.hud-sub{font-size:12px;color:var(--ink2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dot{width:3px;height:3px;border-radius:50%;background:var(--ink3);display:inline-block}
+.xpbar{margin-top:9px;height:9px;border-radius:99px;background:var(--surface2);
+  border:1px solid var(--line);overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--gold) 55%, var(--nut)));
+  transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.xplabel{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-top:5px}
+
+/* sections */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:4px 2px -4px}
+.sec-head h2{margin:0;font-size:12px;letter-spacing:.16em;color:var(--ink3);font-weight:600}
+.sec-head em{font-style:normal;font-size:12px;color:var(--ink3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.daybar{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--line-soft)}
+.daybar .kind{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:17px}
+.daybar .why{font-size:11.5px;color:var(--ink2);margin-left:auto;text-align:right}
+
+/* quest rows */
+.q{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
+  padding:12px 14px;border-bottom:1px solid var(--line-soft);transition:background .15s}
+.q:last-child{border-bottom:none}
+.q:active{background:var(--surface2)}
+.box{flex:none;width:22px;height:22px;margin-top:1px;border-radius:7px;border:1.5px solid var(--line);
+  background:var(--surface2);display:grid;place-items:center;transition:.18s}
+.box svg{width:13px;height:13px;stroke:var(--surface);stroke-width:3;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.18s}
+.q[aria-pressed="true"] .box{background:var(--c);border-color:var(--c)}
+.q[aria-pressed="true"] .box svg{opacity:1;transform:scale(1)}
+.q[aria-pressed="true"] .qname{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--line)}
+.qbody{flex:1;min-width:0}
+.qname{font-weight:600;font-size:14.5px;letter-spacing:-.01em}
+.qdesc{font-size:12px;color:var(--ink2);margin-top:2px}
+.tag{flex:none;font-size:10px;letter-spacing:.08em;font-weight:600;color:var(--c);
+  border:1px solid color-mix(in srgb,var(--c) 35%, transparent);
+  background:color-mix(in srgb,var(--c) 10%, transparent);
+  padding:2px 6px;border-radius:6px;margin-top:2px}
+
+/* boss */
+.boss{padding:14px}
+.boss-top{display:flex;align-items:center;gap:10px}
+.boss-name{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:16px}
+.boss-hp{margin-top:10px;height:14px;border-radius:5px;background:var(--surface2);border:1px solid var(--line);
+  overflow:hidden;position:relative}
+.boss-hp i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--nut),var(--nut) 7px,color-mix(in srgb,var(--nut) 78%,#000) 7px,color-mix(in srgb,var(--nut) 78%,#000) 14px);
+  transition:width .5s}
+.boss-days{display:flex;gap:5px;margin-top:11px}
+.boss-days div{flex:1;text-align:center;font-size:11px;padding:6px 0 5px;border-radius:8px;
+  border:1px solid var(--line);color:var(--ink3);background:var(--surface2)}
+.boss-days div.on{background:color-mix(in srgb,var(--bone) 14%, transparent);border-color:color-mix(in srgb,var(--bone) 45%, transparent);color:var(--bone);font-weight:700}
+.boss-days div.today{box-shadow:inset 0 0 0 1.5px var(--gold)}
+
+/* stats */
+.statrow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--line-soft)}
+.statrow:last-child{border-bottom:none}
+.glyph{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;
+  font-family:"Black Han Sans",sans-serif;font-size:17px;color:var(--c);
+  background:color-mix(in srgb,var(--c) 12%, transparent);border:1px solid color-mix(in srgb,var(--c) 30%, transparent)}
+.statmeta{flex:1;min-width:0}
+.statname{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2);margin-bottom:5px}
+.statname b{color:var(--ink);font-weight:600}
+.track{height:7px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--c);transition:width .4s}
+
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center;box-shadow:var(--shadow)}
+.tile b{display:block;font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;letter-spacing:-.02em}
+.tile span{display:block;font-size:11px;color:var(--ink3);margin-top:2px}
+
+details.day{border-bottom:1px solid var(--line-soft)}
+details.day:last-child{border-bottom:none}
+details.day summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer}
+details.day summary::-webkit-details-marker{display:none}
+.wd{width:26px;height:26px;flex:none;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:700;
+  background:var(--surface2);border:1px solid var(--line);color:var(--ink2)}
+.wd.done{background:var(--bone);border-color:var(--bone);color:var(--surface)}
+.wd.now{box-shadow:0 0 0 2px var(--gold)}
+details.day .nm{font-weight:600;font-size:14px}
+details.day .tg{margin-left:auto;font-size:11px;color:var(--ink3)}
+details.day .list{padding:0 14px 12px 50px}
+details.day .list li{font-size:12.5px;color:var(--ink2);margin-bottom:4px}
+details.day .list ul{margin:0;padding-left:16px}
+details[open] summary .chev{transform:rotate(90deg)}
+.chev{width:8px;height:8px;border-right:1.5px solid var(--ink3);border-bottom:1.5px solid var(--ink3);
+  transform:rotate(-45deg);margin-right:2px;transition:.2s}
+
+.note{font-size:12px;color:var(--ink3);padding:0 4px;line-height:1.6}
+.note b{color:var(--ink2);font-weight:600}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 92%, transparent);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.nav-in{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);
+  padding:6px 14px calc(6px + env(safe-area-inset-bottom))}
+.nav button{padding:9px 0 8px;border-radius:12px;font-size:12px;font-weight:600;color:var(--ink3);
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button .ic{font-family:"Black Han Sans",sans-serif;font-size:15px;line-height:1}
+.nav button[aria-current="true"]{color:var(--gold);background:var(--gold-fill)}
+
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,14px);z-index:50;
+  background:var(--ink);color:var(--ground);padding:11px 18px;border-radius:12px;font-weight:600;font-size:13.5px;
+  opacity:0;pointer-events:none;transition:.3s;box-shadow:var(--shadow);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header class="hud">
+    <div class="hud-top">
+      <div class="crest"><span>骨</span></div>
+      <div class="hud-meta">
+        <div class="hud-title"><b id="lvNum">Lv.1</b><span class="lv" id="chapter">CHAPTER 1</span></div>
+        <div class="hud-sub"><span id="todayLabel">—</span><span class="dot"></span><span id="streak">연속 0일</span></div>
+      </div>
+    </div>
+    <div class="xpbar"><i id="xpFill" style="width:0%"></i></div>
+    <div class="xplabel"><span class="num" id="xpNow">0 / 100 EXP</span><span id="xpNext">다음 레벨까지 100</span></div>
+  </header>
+
+  <!-- TODAY -->
+  <section id="tab-today">
+    <div class="sec-head"><h2>오늘의 퀘스트</h2><em id="dayCount">0 / 0</em></div>
+    <div class="card" style="margin-top:10px">
+      <div class="daybar"><span class="kind" id="dayKind">—</span><span class="why" id="dayWhy"></span></div>
+      <div id="mainQuests"></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:18px"><h2>매일 사이드 퀘스트</h2></div>
+    <div class="card" style="margin-top:10px" id="sideQuests"></div>
+
+    <div class="sec-head" style="margin-top:18px"><h2>이번 주 보스</h2></div>
+    <div class="card boss" style="margin-top:10px">
+      <div class="boss-top">
+        <span class="boss-name">주간 보스 · 관성(慣性)</span>
+        <span class="num" style="margin-left:auto;font-size:12px;color:var(--ink2)" id="bossHpTxt">HP 5 / 5</span>
+      </div>
+      <div class="boss-hp"><i id="bossFill" style="width:100%"></i></div>
+      <div class="boss-days" id="bossDays"></div>
+      <p class="note" style="margin:11px 0 0;padding:0">운동일 <b>5일</b>을 채우면 이번 주 보스가 쓰러집니다. 러닝 2일 + 홈트 3일이면 충분해요.</p>
+    </div>
+  </section>
+
+  <!-- WEEK -->
+  <section id="tab-week" hidden>
+    <div class="sec-head"><h2>주간 루틴</h2><em>하루 15~25분</em></div>
+    <div class="card" style="margin-top:10px" id="weekList"></div>
+    <p class="note" style="margin-top:14px">
+      <b>설계 기준.</b> 골감소증(요추 −2.1 · 대퇴골 −2.2)은 뼈에 <b>충격과 근육의 당김</b>이 있어야 반응합니다.
+      그래서 힐 드롭·홉·카프 레이즈 같은 짧은 충격 동작과 하체 근력이 축이고, 러닝이 여기에 얹힙니다.
+      허리를 <b>굽히는</b> 윗몸일으키기 대신 <b>펴는</b> 슈퍼맨을 넣은 것도 같은 이유예요.
+      왼쪽 무릎은 중둔근(클램쉘·힙 어브덕션)으로 골반부터 잡고, 통증이 있으면 그날 홉은 힐 드롭으로 바꾸세요.
+    </p>
+  </section>
+
+  <!-- STATS -->
+  <section id="tab-stats" hidden>
+    <div class="sec-head"><h2>스탯</h2><em>완료할수록 성장</em></div>
+    <div class="card" style="margin-top:10px" id="statList"></div>
+
+    <div class="sec-head" style="margin-top:18px"><h2>기록</h2></div>
+    <div class="tiles" style="margin-top:10px">
+      <div class="tile"><b class="num" id="tDays">0</b><span>운동한 날</span></div>
+      <div class="tile"><b class="num" id="tBest">0</b><span>최고 연속</span></div>
+      <div class="tile"><b class="num" id="tWeeks">0</b><span>진행 주차</span></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:18px"><h2>최종 보스</h2></div>
+    <div class="card boss" style="margin-top:10px">
+      <div class="boss-top">
+        <span class="boss-name">2027.08 골밀도 재검사</span>
+        <span class="num" style="margin-left:auto;font-size:12px;color:var(--nut)" id="dday">D-0</span>
+      </div>
+      <p class="note" style="margin:9px 0 0;padding:0">검진 소견의 <b>12개월 후 추적검사</b>가 이 원정의 결말입니다. 목표는 골밀도 유지 이상, 그리고 근육량 표준.</p>
+      <div class="boss-days" style="margin-top:12px" id="chapters"></div>
+    </div>
+
+    <p class="note" style="margin-top:14px">
+      시작 지점 · 2026.08.21 검진 · 목표 = 골밀도 유지 이상 + 근육량 표준
+    </p>
+    <button id="reset" style="margin:16px auto 0;display:block;font-size:12px;color:var(--ink3);text-decoration:underline">기록 초기화</button>
+  </section>
+</div>
+
+<nav class="nav"><div class="nav-in">
+  <button data-tab="today" aria-current="true"><span class="ic">今</span>오늘</button>
+  <button data-tab="week"><span class="ic">週</span>주간</button>
+  <button data-tab="stats"><span class="ic">記</span>스탯</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const STATS={bone:{n:"골밀도",g:"骨",v:"--bone"},str:{n:"근력",g:"筋",v:"--str"},
+  flex:{n:"유연성",g:"柔",v:"--flex"},sta:{n:"지구력",g:"持",v:"--sta"},nut:{n:"영양",g:"養",v:"--nut"}};
+
+const ROUTINE={
+ 0:{kind:"리커버리",why:"쉬는 것도 루틴",items:[
+   {t:"전신 스트레칭 10분",d:"목·가슴·허벅지 뒤·종아리 순서로",s:"flex"},
+   {t:"산책 20분",d:"밖에서 걸으면 햇빛 퀘스트도 같이 깸",s:"sta"}]},
+ 1:{kind:"하체 기둥",why:"대퇴골 −2.2 공략",items:[
+   {t:"캣카우 + 힙 서클 2분",d:"굳은 골반부터 풀고 시작",s:"flex"},
+   {t:"의자 스쿼트 12회 × 3",d:"의자에 살짝 닿았다 일어나기. 무릎이 안쪽으로 모이지 않게",s:"str"},
+   {t:"힙 브릿지 15회 × 3",d:"엉덩이로 밀어 올리기. 허리로 젖히지 않기",s:"str"},
+   {t:"스플릿 스쿼트 8회씩 × 2",d:"왼쪽 먼저. 무릎이 불편하면 반만 내려가기",s:"str"},
+   {t:"카프 레이즈 20회 × 2",d:"천천히 올리고 뒤꿈치는 툭 떨어뜨리기",s:"bone"},
+   {t:"힙 플렉서 스트레칭 30초씩",d:"앉아 있는 시간이 만든 골반 앞쪽 단축 풀기",s:"flex"}]},
+ 2:{kind:"러닝 데이",why:"런데이 앱",items:[
+   {t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
+   {t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
+   {t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]},
+ 3:{kind:"상체 & 코어",why:"요추 −2.1 지지",items:[
+   {t:"어깨 워밍업 2분",d:"팔 크게 돌리기 · 수건 잡고 위로 넘기기",s:"flex"},
+   {t:"무릎 푸시업 8~12회 × 3",d:"힘들면 벽 푸시업부터",s:"str"},
+   {t:"수건 로우 12회 × 3",d:"수건 양끝 당기며 날개뼈 모으기",s:"str"},
+   {t:"슈퍼맨 10회 × 2",d:"골감소증엔 허리를 굽히는 윗몸일으키기보다 펴는 동작이 안전",s:"bone"},
+   {t:"데드버그 10회씩 × 2",d:"허리를 바닥에 붙인 채로",s:"str"}]},
+ 4:{kind:"모빌리티 & 정렬",why:"골반·무릎 정돈",items:[
+   {t:"90/90 힙 스트레칭 1분씩",d:"틀어진 쪽이 더 뻑뻑할 거예요. 거기서 더 버티기",s:"flex"},
+   {t:"오픈북 10회씩",d:"옆으로 누워 위쪽 팔을 반대로 열기",s:"flex"},
+   {t:"클램쉘 15회씩 × 2",d:"중둔근 = 왼쪽 무릎 부하를 덜어줄 근육",s:"str"},
+   {t:"사이드라잉 힙 어브덕션 12회씩 × 2",d:"골반이 뒤로 눕지 않게",s:"str"},
+   {t:"종아리·발목 스트레칭 1분씩",d:"발목이 뻣뻣하면 무릎이 대신 일함",s:"flex"}]},
+ 5:{kind:"임팩트 데이",why:"뼈에 직접 신호",items:[
+   {t:"힐 드롭 10회 × 2",d:"발끝으로 섰다가 뒤꿈치 쿵. 무릎 부담은 적고 뼈 자극은 큼",s:"bone"},
+   {t:"스텝 터치 3분",d:"음악 한 곡 틀고 좌우로",s:"sta"},
+   {t:"작은 양발 홉 10회 × 2",d:"낮게 톡톡. 무릎이 불편한 날은 힐 드롭으로 대체",s:"bone"},
+   {t:"루마니안 데드리프트 12회 × 3",d:"가방에 책 넣고. 엉덩이를 뒤로 빼며 등은 곧게",s:"str"},
+   {t:"월 시트 20~30초 × 2",d:"벽에 기대 앉기. 무릎은 90도까지만",s:"str"}]},
+ 6:{kind:"러닝 데이",why:"런데이 앱",items:[
+   {t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
+   {t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
+   {t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]}
+};
+const SIDE=[
+ {t:"단백질 3번 챙기기",d:"그릭요거트 · 두부김치 · 후무스 · 닭가슴살 · 생선 중 아무거나",s:"nut"},
+ {t:"칼슘 + 비타민 D",d:"우유나 요거트 1회 + 햇빛 15분(또는 보충제)",s:"bone"},
+ {t:"물 6잔",d:"텀블러 한 번 채울 때마다 2잔",s:"nut"},
+ {t:"가당 음료 0잔",d:"당화혈색소를 되돌리는 가장 빠른 한 칸",s:"nut"}
+];
+const DAYNM=["일","월","화","수","목","금","토"];
+const CHAPTERS=[["굳은 몸 깨우기",0],["기초 골격 세우기",12],["부하 올리기",24],["재검진 보스전",36]];
+const START_ISO="2026-09-02", EXAM_ISO="2027-08-21";
+const KEY="bonequest.v1";
+
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parse=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+let S=(()=>{try{return JSON.parse(localStorage.getItem(KEY))||{log:{}}}catch(e){return{log:{}}}})();
+if(!S.log)S.log={};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const today=new Date(), tISO=iso(today), wd=today.getDay();
+const done=d=>S.log[d]||[];
+const has=(d,id)=>done(d).includes(id);
+const mainIds=w=>ROUTINE[w].items.map((_,i)=>"m"+w+"-"+i);
+const dayCleared=d=>{const w=parse(d).getDay();const g=done(d);return mainIds(w).every(id=>g.includes(id))};
+
+function totals(){
+  let exp=0;const st={bone:0,str:0,flex:0,sta:0,nut:0};let days=0;
+  for(const d in S.log){
+    const g=S.log[d];if(!g.length)continue;days++;
+    const w=parse(d).getDay();
+    g.forEach(id=>{
+      let q=null;
+      if(id[0]==="s")q=SIDE[+id.slice(1)];
+      else{const p=id.slice(1).split("-");q=(ROUTINE[+p[0]]||{items:[]}).items[+p[1]]}
+      if(!q)return;exp+=id[0]==="s"?5:10;st[q.s]+=1;
+    });
+    if(dayCleared(d))exp+=20;
+  }
+  return{exp,st,days};
+}
+function level(exp){let lv=1,need=100,rem=exp;while(rem>=need){rem-=need;lv++;need=100+(lv-1)*20}return{lv,rem,need}}
+function streaks(){
+  let cur=0,best=0,run=0;
+  const keys=Object.keys(S.log).filter(d=>S.log[d].length).sort();
+  if(keys.length){
+    let prev=null;
+    keys.forEach(d=>{
+      if(prev&&(parse(d)-parse(prev))/864e5===1)run++;else run=1;
+      best=Math.max(best,run);prev=d;
+    });
+    const gap=(parse(tISO)-parse(keys[keys.length-1]))/864e5;
+    cur=gap<=1?run:0;
+  }
+  return{cur,best};
+}
+function weekStart(){const d=new Date(today);const off=(d.getDay()+6)%7;d.setDate(d.getDate()-off);d.setHours(0,0,0,0);return d}
+
+function row(id,q,checked){
+  const b=document.createElement("button");
+  b.className="q";b.type="button";b.setAttribute("aria-pressed",checked);
+  b.style.setProperty("--c",`var(${STATS[q.s].v})`);
+  b.innerHTML=`<span class="box"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5"/></svg></span>
+    <span class="qbody"><span class="qname">${q.t}</span><span class="qdesc">${q.d}</span></span>
+    <span class="tag">${STATS[q.s].g}</span>`;
+  b.onclick=()=>toggle(id,b);
+  return b;
+}
+function toggle(id,b){
+  const before=level(totals().exp).lv, wasClear=dayCleared(tISO);
+  const g=done(tISO).slice();const i=g.indexOf(id);
+  if(i>-1)g.splice(i,1);else g.push(id);
+  S.log[tISO]=g;save();
+  b.setAttribute("aria-pressed",i===-1);
+  const after=level(totals().exp).lv;
+  render();
+  if(after>before)toast(`LEVEL UP  \u2192  Lv.${after}`);
+  else if(!wasClear&&dayCleared(tISO))toast("오늘 메인 퀘스트 클리어!  +20 EXP");
+}
+let tmr;
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(tmr);tmr=setTimeout(()=>t.classList.remove("show"),2200)}
+
+function render(){
+  const T=totals(),L=level(T.exp),S2=streaks();
+  document.getElementById("lvNum").textContent="Lv."+L.lv;
+  document.getElementById("xpFill").style.width=Math.min(100,L.rem/L.need*100)+"%";
+  document.getElementById("xpNow").textContent=`${L.rem} / ${L.need} EXP`;
+  document.getElementById("xpNext").textContent=`다음 레벨까지 ${L.need-L.rem}`;
+  document.getElementById("streak").textContent=`연속 ${S2.cur}일`;
+  document.getElementById("todayLabel").textContent=`${today.getMonth()+1}월 ${today.getDate()}일 (${DAYNM[wd]})`;
+
+  const wks=Math.max(0,Math.floor((parse(tISO)-parse(START_ISO))/6048e5));
+  let ch=1;CHAPTERS.forEach((c,i)=>{if(wks>=c[1])ch=i+1});
+  document.getElementById("chapter").textContent=`CHAPTER ${ch}`;
+
+  const dq=done(tISO);
+  document.getElementById("dayCount").textContent=`${dq.filter(x=>x[0]==="m").length} / ${ROUTINE[wd].items.length}`;
+  document.getElementById("dayKind").textContent=ROUTINE[wd].kind;
+  document.getElementById("dayWhy").textContent=ROUTINE[wd].why;
+  const mq=document.getElementById("mainQuests");mq.innerHTML="";
+  ROUTINE[wd].items.forEach((q,i)=>mq.appendChild(row("m"+wd+"-"+i,q,has(tISO,"m"+wd+"-"+i))));
+  const sq=document.getElementById("sideQuests");sq.innerHTML="";
+  SIDE.forEach((q,i)=>sq.appendChild(row("s"+i,q,has(tISO,"s"+i))));
+
+  // boss
+  const ws=weekStart();let cleared=0;const bd=document.getElementById("bossDays");bd.innerHTML="";
+  for(let i=0;i<7;i++){
+    const d=new Date(ws);d.setDate(ws.getDate()+i);const key=iso(d);
+    const ok=(S.log[key]||[]).some(x=>x[0]==="m");if(ok)cleared++;
+    const el=document.createElement("div");el.textContent=DAYNM[d.getDay()];
+    if(ok)el.classList.add("on");if(key===tISO)el.classList.add("today");bd.appendChild(el);
+  }
+  const hp=Math.max(0,5-cleared);
+  document.getElementById("bossFill").style.width=(hp/5*100)+"%";
+  document.getElementById("bossHpTxt").textContent=hp?`HP ${hp} / 5`:"처치 완료";
+
+  // week tab
+  const wl=document.getElementById("weekList");wl.innerHTML="";
+  [1,2,3,4,5,6,0].forEach(w=>{
+    const r=ROUTINE[w],el=document.createElement("details");el.className="day";
+    const d=new Date(ws);d.setDate(ws.getDate()+((w+6)%7));const key=iso(d);
+    const ok=(S.log[key]||[]).some(x=>x[0]==="m");
+    el.innerHTML=`<summary><span class="chev"></span><span class="wd${ok?" done":""}${key===tISO?" now":""}">${DAYNM[w]}</span>
+      <span class="nm">${r.kind}</span><span class="tg">${r.why}</span></summary>
+      <div class="list"><ul>${r.items.map(q=>`<li>${q.t}</li>`).join("")}</ul></div>`;
+    wl.appendChild(el);
+  });
+
+  // stats
+  const sl=document.getElementById("statList");sl.innerHTML="";
+  Object.keys(STATS).forEach(k=>{
+    const p=T.st[k],rank=Math.floor(p/15)+1,pct=(p%15)/15*100;
+    const el=document.createElement("div");el.className="statrow";el.style.setProperty("--c",`var(${STATS[k].v})`);
+    el.innerHTML=`<span class="glyph">${STATS[k].g}</span><span class="statmeta">
+      <span class="statname"><b>${STATS[k].n}</b><span class="num">RANK ${rank} · ${p}p</span></span>
+      <span class="track"><i style="width:${pct}%"></i></span></span>`;
+    sl.appendChild(el);
+  });
+  document.getElementById("tDays").textContent=T.days;
+  document.getElementById("tBest").textContent=S2.best;
+  document.getElementById("tWeeks").textContent=wks+1;
+  document.getElementById("dday").textContent="D-"+Math.max(0,Math.round((parse(EXAM_ISO)-parse(tISO))/864e5));
+  const cw=document.getElementById("chapters");cw.innerHTML="";
+  CHAPTERS.forEach((c,i)=>{const el=document.createElement("div");el.textContent=`${i+1}. ${c[0]}`;
+    el.style.fontSize="10.5px";if(i+1===ch)el.classList.add("on");cw.appendChild(el)});
+}
+
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.setAttribute("aria-current",x===b));
+  ["today","week","stats"].forEach(t=>document.getElementById("tab-"+t).hidden=(t!==b.dataset.tab));
+  window.scrollTo({top:0,behavior:"instant"});
+});
+document.getElementById("reset").onclick=()=>{S={log:{}};save();render();toast("기록을 비웠습니다")};
+render();
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("./sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
