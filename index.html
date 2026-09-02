@@ -337,7 +337,8 @@ const dayCleared=d=>{const w=parse(d).getDay();const g=done(d);return mainIds(w)
 function totals(){
   let exp=0;const st={bone:0,str:0,flex:0,sta:0,nut:0};let days=0;
   for(const d in S.log){
-    const g=S.log[d];if(!g.length)continue;days++;
+    const g=S.log[d];if(!g.length)continue;
+    if(g.some(x=>x[0]==="m"))days++;   // 사이드 퀘스트만 한 날은 운동일로 세지 않음
     const w=parse(d).getDay();
     g.forEach(id=>{
       let q=null;
@@ -352,7 +353,7 @@ function totals(){
 function level(exp){let lv=1,need=100,rem=exp;while(rem>=need){rem-=need;lv++;need=100+(lv-1)*20}return{lv,rem,need}}
 function streaks(){
   let cur=0,best=0,run=0;
-  const keys=Object.keys(S.log).filter(d=>S.log[d].length).sort();
+  const keys=Object.keys(S.log).filter(d=>S.log[d].some(x=>x[0]==="m")).sort();
   if(keys.length){
     let prev=null;
     keys.forEach(d=>{
