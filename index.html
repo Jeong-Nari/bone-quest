@@ -13,6 +13,7 @@
 <link rel="icon" href="./icon-192.png">
 <style>html,body{background:#071827}</style>
 <title>본 어드벤처</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap">
 <style>
 :root{
@@ -25,6 +26,8 @@
   --f-mini:"Silkscreen","Courier New",monospace;
   --f-kr:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --f-krh:"Black Han Sans",sans-serif;
+  --f-pxkr:"Galmuri11","Black Han Sans",sans-serif;
+  --f-pxkr9:"Galmuri9","Galmuri11","Black Han Sans",sans-serif;
   --hard:4px 4px 0 #030D16;
 }
 *{box-sizing:border-box}
@@ -97,14 +100,14 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 /* ===== SECTION HEADS ===== */
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:30px 1px 11px}
 .sec-head:first-child{margin-top:2px}
-.sec-head h2{margin:0;font-family:var(--f-kr);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--cream)}
-.sec-head h2::before{content:"\25C6";color:var(--gold);font-size:11px;margin-right:7px}
+.sec-head h2{margin:0;font-family:var(--f-pxkr9);font-size:18px;font-weight:400;letter-spacing:.02em;line-height:1.2;color:var(--cream)}
+.sec-head h2::before{content:"\25C6";color:var(--gold);font-size:11px;margin-right:7px;vertical-align:2px}
 .sec-head em{font-style:normal;font-family:var(--f-px);font-size:9px;color:var(--gold)}
 
 /* ===== DAY BAR ===== */
 .daybar{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--panel2);
   border-bottom:2px solid var(--line)}
-.daybar .kind{font-family:var(--f-krh);font-weight:400;font-size:17px;color:var(--cream)}
+.daybar .kind{font-family:var(--f-pxkr);font-weight:400;font-size:22px;line-height:1.2;color:var(--cream)}
 .daybar .why{font-size:11px;color:var(--gold);margin-left:auto;text-align:right;font-weight:500}
 
 /* ===== QUEST ROW ===== */
@@ -142,7 +145,7 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .bossart.alive{animation:bob 1s steps(1,end) infinite}
 .bossart.final{animation:sway 2.2s steps(1,end) infinite}
 .bossart.down{opacity:.8}
-.boss-name{display:block;font-family:var(--f-krh);font-weight:400;font-size:17px;color:var(--cream)}
+.boss-name{display:block;font-family:var(--f-pxkr);font-weight:400;font-size:22px;line-height:1.2;color:var(--cream)}
 .boss-flavor{display:block;font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4}
 .boss-hp{position:relative;margin-top:11px;height:16px;background:var(--bg);border:2px solid var(--line);overflow:hidden}
 .boss-hp i{display:block;height:100%;background:var(--red);transition:width .25s steps(5,end)}
@@ -166,7 +169,7 @@ details.day.today summary{background:var(--panel2)}
   background:var(--bg);border:2px solid var(--line);color:var(--muted)}
 .wd.done{background:#17402A;border-color:var(--green);color:var(--green)}
 .wd.now{border-color:var(--gold);color:var(--gold)}
-details.day .nm{font-family:var(--f-krh);font-weight:400;font-size:15px;color:var(--cream)}
+details.day .nm{font-family:var(--f-pxkr9);font-weight:400;font-size:18px;line-height:1.2;color:var(--cream)}
 details.day .tg{margin-left:auto;font-size:11px;color:var(--dim)}
 details.day .list{padding:0 12px 12px 50px}
 details.day .list ul{margin:0;padding-left:14px;list-style:none}
