@@ -136,6 +136,25 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .rew{font-family:var(--f-px);font-size:7px;color:var(--gold)}
 .q[aria-pressed="true"] .rew{color:var(--dim)}
 
+/* ===== STORY ===== */
+.story{position:fixed;inset:0;z-index:60;background:rgba(4,10,17,.96);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
+.story-art{width:96px;height:96px;image-rendering:pixelated;animation:sway 2.2s steps(1,end) infinite}
+.story-box{width:min(420px,100%);padding:16px 15px 14px;background:var(--panel);
+  border:3px solid var(--cream);box-shadow:var(--hard)}
+.story-eyebrow{font-family:var(--f-mini);font-size:11px;letter-spacing:.14em;color:var(--gold);margin-bottom:11px}
+.story-text{margin:0;font-size:14.5px;line-height:1.8;color:var(--cream);min-height:6em;white-space:pre-line}
+.story-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.story-next{font-family:var(--f-mini);font-size:11px;letter-spacing:.1em;color:var(--gold);
+  animation:blink 1s steps(1,end) infinite}
+.lore{padding:13px 12px;border-bottom:2px solid rgba(60,90,115,.5)}
+.lore:last-child{border-bottom:none}
+.lore h3{margin:0 0 7px;font-family:var(--f-pxkr9);font-weight:400;font-size:18px;line-height:1.2;color:var(--cream)}
+.lore p{margin:0;font-size:12.5px;line-height:1.7;color:var(--muted)}
+.lore.locked h3,.lore.locked p{color:var(--dim)}
+.lore .ch{font-family:var(--f-mini);font-size:10px;letter-spacing:.1em;color:var(--gold);display:block;margin-bottom:5px}
+.lore.locked .ch{color:var(--dim)}
+
 /* ===== BOSS ===== */
 .boss{padding:13px 12px}
 .boss-top{display:flex;align-items:center;gap:11px}
@@ -265,7 +284,7 @@ details[open] summary .chev{transform:rotate(45deg)}
         <img class="bossart alive" id="bossImg" alt="주간 보스" width="58" height="58">
         <span style="min-width:0">
           <span class="boss-name">관성(慣性)</span>
-          <span class="boss-flavor">움직이지 않으려는 힘. 매주 되살아난다.</span>
+          <span class="boss-flavor">여정을 가로막는 안개. 매주 되살아나 용사의 발을 붙든다.</span>
         </span>
         <span class="num" style="margin-left:auto;font-size:12px;color:var(--ink2)" id="bossHpTxt">HP 5 / 5</span>
       </div>
@@ -305,17 +324,21 @@ details[open] summary .chev{transform:rotate(45deg)}
         <img class="bossart final" id="skullImg" alt="최종 보스" width="58" height="58">
         <span style="min-width:0">
           <span class="boss-name">골왕(骨王)</span>
-          <span class="boss-flavor">2027.08 골밀도 재검사</span>
+          <span class="boss-flavor">봉인이 풀리는 날 · 2027.08 골밀도 재검사</span>
         </span>
         <span class="num" style="margin-left:auto;font-size:12px;color:var(--nut)" id="dday">D-0</span>
       </div>
-      <p class="note" style="margin:9px 0 0;padding:0">검진 소견의 <b>12개월 후 추적검사</b>가 이 원정의 결말입니다. 목표는 골밀도 유지 이상, 그리고 근육량 표준.</p>
+      <p class="note" style="margin:9px 0 0;padding:0">봉인이 풀리는 날은 검진 소견의 <b>12개월 후 추적검사</b>. 그날 골밀도 유지 이상과 근육량 표준을 들고 서 있으면 승리.</p>
       <div class="boss-days" style="margin-top:12px" id="chapters"></div>
     </div>
 
     <p class="note" style="margin-top:14px">
       시작 지점 · 2026.08.21 검진 · 목표 = 골밀도 유지 이상 + 근육량 표준
     </p>
+
+    <div class="sec-head"><h2>예언서</h2><em id="loreCount">1 / 4</em></div>
+    <div class="card" id="loreList"></div>
+    <button class="snd" id="replayStory" type="button" style="margin:12px auto 0;display:block">프롤로그 다시 보기</button>
 
     <div class="sec-head"><h2>기록 백업</h2></div>
     <div class="card" style="padding:12px">
@@ -329,6 +352,17 @@ details[open] summary .chev{transform:rotate(45deg)}
   </section>
 </div>
 
+<div class="story" id="story" hidden>
+  <img class="story-art" id="storyArt" alt="">
+  <div class="story-box">
+    <div class="story-eyebrow">◆ 예언</div>
+    <p class="story-text" id="storyText"></p>
+    <div class="story-foot">
+      <button class="snd" id="storySkip" type="button">건너뛰기</button>
+      <span class="story-next" id="storyNext">▶ 계속</span>
+    </div>
+  </div>
+</div>
 <nav class="nav"><div class="nav-in">
   <button data-tab="today" aria-current="true">오늘</button>
   <button data-tab="week">주간</button>
@@ -388,7 +422,17 @@ const SIDE=[
  {t:"가당 음료 0잔",d:"당화혈색소를 되돌리는 가장 빠른 한 칸",s:"nut"}
 ];
 const DAYNM=["일","월","화","수","목","금","토"];
-const CHAPTERS=[["굳은 몸 깨우기",0],["기초 골격 세우기",12],["부하 올리기",24],["재검진 보스전",36]];
+const CHAPTERS=[
+ ["굳은 몸 깨우기",0,"2년을 쉰 몸은 삐걱인다. 용사는 아직 검을 제대로 들지 못한다. 그래도 첫 걸음은 내딛는 것에서 시작된다. 무너진 자세부터 바로 세울 것."],
+ ["기초 골격 세우기",12,"발뒤꿈치가 땅을 두드릴 때마다 뼈에 신호가 닿는다. 무르던 골격이 제 모양을 찾기 시작한다. 용사는 이제 자기 몸무게를 감당할 수 있다."],
+ ["부하 올리기",24,"땅이 미세하게 흔들린다. 봉인이 약해지고 있다. 용사는 더 무거운 것을 들기 시작한다. 남은 시간이 길지 않다."],
+ ["재검진 보스전",36,"봉인이 풀린다. 골왕이 눈을 뜬다. 1년간 벼려온 뼈와 근육으로, 용사는 마지막 검진대에 오른다."]];
+const PROLOGUE=[
+ "먼 옛날, 사람의 뼈를 갉아 속을 비우는 왕이 있었다.\n사람들은 그를 골왕(骨王)이라 불렀다.",
+ "현자들은 목숨을 걸고 그를 땅속 깊이 봉인했다.\n그리고 오랜 세월이 흘렀다.",
+ "어느 날 예언자가 말했다.\n\n— 봉인은 더 버티지 못한다.\n— 열두 달 뒤, 골왕이 다시 깨어나리라.",
+ "선택받은 용사여.\n그대의 뼈는 아직 무르고, 근육은 아직 얕다.",
+ "남은 시간은 1년.\n하루하루 몸을 벼려 그날에 맞서라.\n\n이것이 그대의 원정이다."];
 const START_ISO="2026-09-02", EXAM_ISO="2027-08-21";
 const KEY="bonequest.v1";
 
@@ -537,6 +581,15 @@ function render(){
   document.getElementById("tBest").textContent=S2.best;
   document.getElementById("tWeeks").textContent=wks+1;
   document.getElementById("dday").textContent="D-"+Math.max(0,Math.round((parse(EXAM_ISO)-parse(tISO))/864e5));
+  const ll=document.getElementById("loreList");ll.innerHTML="";
+  CHAPTERS.forEach((c,i)=>{
+    const open=(i+1)<=ch, el=document.createElement("div");
+    el.className="lore"+(open?"":" locked");
+    el.innerHTML=`<span class="ch">CHAPTER ${i+1}</span>
+      <h3>${open?c[0]:"???"}</h3><p>${open?c[2]:"아직 밝혀지지 않은 이야기."}</p>`;
+    ll.appendChild(el);
+  });
+  document.getElementById("loreCount").textContent=ch+" / 4";
   const cw=document.getElementById("chapters");cw.innerHTML="";
   CHAPTERS.forEach((c,i)=>{const el=document.createElement("div");el.textContent=`${i+1}. ${c[0]}`;
     el.style.fontSize="10.5px";if(i+1===ch)el.classList.add("on");cw.appendChild(el)});
@@ -716,9 +769,28 @@ impFile.onchange=e=>{
   r.readAsText(f);
 };
 
+
+/* ===== 프롤로그 ===== */
+const storyEl=document.getElementById("story"),
+      storyText=document.getElementById("storyText"),
+      storyArt=document.getElementById("storyArt");
+let sPage=0;
+function paintStory(){ storyText.textContent=PROLOGUE[sPage];
+  document.getElementById("storyNext").textContent=(sPage<PROLOGUE.length-1)?"▶ 계속":"▶ 여정을 시작한다"; }
+function openStory(){ sPage=0; storyArt.src=SPRITE.skull; paintStory(); storyEl.hidden=false; }
+function closeStory(){ storyEl.hidden=true; S.seen=1; save(); }
+storyEl.onclick=e=>{
+  if(e.target.id==="storySkip")return;
+  if(sPage<PROLOGUE.length-1){ sPage++; paintStory(); sfx("tab"); }
+  else { closeStory(); sfx("level"); }
+};
+document.getElementById("storySkip").onclick=e=>{ e.stopPropagation(); closeStory(); };
+document.getElementById("replayStory").onclick=openStory;
+
 document.getElementById("crestImg").src=SPRITE.bone;
 document.getElementById("skullImg").src=SPRITE.skull;
 render();
+if(!S.seen)openStory();
 </script>
 
 <script>
