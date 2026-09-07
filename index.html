@@ -380,49 +380,49 @@ const STATS={bone:{n:"골밀도",g:"骨",v:"--bone"},str:{n:"근력",g:"筋",v:"
 
 const ROUTINE={
  0:{kind:"리커버리",why:"쉬는 것도 루틴",items:[
-   {t:"전신 스트레칭 10분",d:"목·가슴·허벅지 뒤·종아리 순서로",s:"flex"},
-   {t:"산책 20분",d:"밖에서 걸으면 햇빛 퀘스트도 같이 깸",s:"sta"}]},
+   {i:"rec-stretch",t:"전신 스트레칭 10분",d:"목·가슴·허벅지 뒤·종아리 순서로",s:"flex"},
+   {i:"rec-walk",t:"산책 20분",d:"밖에서 걸으면 햇빛 퀘스트도 같이 깸",s:"sta"}]},
  1:{kind:"하체 기둥",why:"대퇴골 공략",items:[
-   {t:"캣카우 + 힙 서클 2분",d:"굳은 골반부터 풀고 시작",s:"flex"},
-   {t:"의자 스쿼트 12회 × 3",d:"의자에 살짝 닿았다 일어나기. 무릎이 안쪽으로 모이지 않게",s:"str"},
-   {t:"힙 브릿지 15회 × 3",d:"엉덩이로 밀어 올리기. 허리로 젖히지 않기",s:"str"},
-   {t:"스플릿 스쿼트 8회씩 × 2",d:"왼쪽 먼저. 왼쪽만 1세트 더. 무릎이 불편하면 반만 내려가기",s:"str"},
-   {t:"카프 레이즈 20회 × 2",d:"천천히 올리고 뒤꿈치는 툭 떨어뜨리기",s:"bone"},
-   {t:"힙 플렉서 스트레칭 30초씩",d:"앉아 있는 시간이 만든 골반 앞쪽 단축 풀기",s:"flex"}]},
+   {i:"cat-cow",t:"캣카우 + 힙 서클 2분",d:"굳은 골반부터 풀고 시작",s:"flex"},
+   {i:"chair-squat",t:"의자 스쿼트 12회 × 3",d:"의자에 살짝 닿았다 일어나기. 무릎이 안쪽으로 모이지 않게",s:"str"},
+   {i:"hip-bridge",t:"힙 브릿지 15회 × 3",d:"엉덩이로 밀어 올리기. 허리로 젖히지 않기",s:"str"},
+   {i:"split-squat",t:"스플릿 스쿼트 8회씩 × 2",d:"왼쪽 먼저. 왼쪽만 1세트 더. 무릎이 불편하면 반만 내려가기",s:"str"},
+   {i:"calf-raise",t:"카프 레이즈 20회 × 2",d:"천천히 올리고 뒤꿈치는 툭 떨어뜨리기",s:"bone"},
+   {i:"hipflexor-stretch",t:"힙 플렉서 스트레칭 30초씩",d:"앉아 있는 시간이 만든 골반 앞쪽 단축 풀기",s:"flex"}]},
  2:{kind:"러닝 데이",why:"런데이 앱",items:[
-   {t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
-   {t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
-   {t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]},
+   {i:"run-warmup",t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
+   {i:"runday",t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
+   {i:"run-stretch",t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]},
  3:{kind:"상체 & 어깨 정렬",why:"라운드 숄더 교정",items:[
-   {t:"수건 흉추 신전 2분",d:"수건을 말아 등 위쪽(날개뼈 높이)에 대고 누워 가슴 열기. 팔 크게 돌리기보다 안전",s:"flex"},
-   {t:"벽 슬라이드 10회 × 2",d:"등·팔을 벽에 붙이고 위아래로. 왼팔이 벽에서 뜨는 지점까지만 — 그 범위가 오늘의 한계",s:"flex"},
-   {t:"수건 로우 12회 × 3",d:"손으로 당기지 말고 견갑골을 먼저 모은 뒤 팔꿈치를 뒤 주머니에 꽂는 느낌. 앉아서 하면 몸통 비틀기 보상이 줄어듦",s:"str"},
-   {t:"수건 풀 어파트 15회 × 2",d:"팔을 앞으로 편 채 수건을 양옆으로 당겨 벌리기. 굽은 어깨를 뒤로 여는 동작",s:"str"},
-   {t:"인클라인 푸시업 10회 × 2",d:"식탁이나 벽을 짚고. 팔꿈치는 몸에서 45도. 바닥 푸시업보다 어깨 부담이 적음",s:"str"},
-   {t:"슈퍼맨 10회 × 2",d:"골감소증엔 허리를 굽히는 윗몸일으키기보다 펴는 동작이 안전",s:"bone"}]},
+   {i:"tspine-towel",t:"수건 흉추 신전 2분",d:"수건을 말아 등 위쪽(날개뼈 높이)에 대고 누워 가슴 열기. 팔 크게 돌리기보다 안전",s:"flex"},
+   {i:"wall-slide",t:"벽 슬라이드 10회 × 2",d:"등·팔을 벽에 붙이고 위아래로. 왼팔이 벽에서 뜨는 지점까지만 — 그 범위가 오늘의 한계",s:"flex"},
+   {i:"towel-row",t:"수건 로우 12회 × 3",d:"손으로 당기지 말고 견갑골을 먼저 모은 뒤 팔꿈치를 뒤 주머니에 꽂는 느낌. 앉아서 하면 몸통 비틀기 보상이 줄어듦",s:"str"},
+   {i:"towel-pullapart",t:"수건 풀 어파트 15회 × 2",d:"팔을 앞으로 편 채 수건을 양옆으로 당겨 벌리기. 굽은 어깨를 뒤로 여는 동작",s:"str"},
+   {i:"incline-pushup",t:"인클라인 푸시업 10회 × 2",d:"식탁이나 벽을 짚고. 팔꿈치는 몸에서 45도. 바닥 푸시업보다 어깨 부담이 적음",s:"str"},
+   {i:"superman",t:"슈퍼맨 10회 × 2",d:"골감소증엔 허리를 굽히는 윗몸일으키기보다 펴는 동작이 안전",s:"bone"}]},
  4:{kind:"모빌리티 & 정렬",why:"골반·무릎 + 코어",items:[
-   {t:"90/90 힙 스트레칭 1분씩",d:"양손 뒤로 짚고 상체 세운 채. 무릎 90도 안 나와도 됨. 왼쪽부터 · 왼쪽은 2배 오래",s:"flex"},
-   {t:"오픈북 10회씩",d:"옆으로 누워 위쪽 팔을 반대로 열기. 왼쪽부터 · 왼쪽은 2배 오래",s:"flex"},
-   {t:"클램쉘 15회씩 × 2",d:"왼쪽부터 · 끝에서 2초 정지 · 왼쪽만 1세트 더. 손으로 둔근을 만져가며 감각 찾기",s:"str"},
-   {t:"사이드라잉 힙 어브덕션 12회씩 × 2",d:"골반이 뒤로 눕지 않게. 왼쪽부터 · 왼쪽만 1세트 더",s:"str"},
-   {t:"종아리·발목 스트레칭 1분씩",d:"발목이 뻣뻣하면 무릎이 대신 일함. 왼쪽은 2배 오래",s:"flex"},
-   {t:"데드버그 10회씩 × 2",d:"허리를 바닥에 붙인 채로. 수요일에서 옮겨온 코어 운동",s:"str"}]},
+   {i:"hip-9090",t:"90/90 힙 스트레칭 1분씩",d:"양손 뒤로 짚고 상체 세운 채. 무릎 90도 안 나와도 됨. 왼쪽부터 · 왼쪽은 2배 오래",s:"flex"},
+   {i:"openbook",t:"오픈북 10회씩",d:"옆으로 누워 위쪽 팔을 반대로 열기. 왼쪽부터 · 왼쪽은 2배 오래",s:"flex"},
+   {i:"clamshell",t:"클램쉘 15회씩 × 2",d:"왼쪽부터 · 끝에서 2초 정지 · 왼쪽만 1세트 더. 손으로 둔근을 만져가며 감각 찾기",s:"str"},
+   {i:"side-abduction",t:"사이드라잉 힙 어브덕션 12회씩 × 2",d:"골반이 뒤로 눕지 않게. 왼쪽부터 · 왼쪽만 1세트 더",s:"str"},
+   {i:"calf-ankle",t:"종아리·발목 스트레칭 1분씩",d:"발목이 뻣뻣하면 무릎이 대신 일함. 왼쪽은 2배 오래",s:"flex"},
+   {i:"deadbug",t:"데드버그 10회씩 × 2",d:"허리를 바닥에 붙인 채로. 수요일에서 옮겨온 코어 운동",s:"str"}]},
  5:{kind:"임팩트 데이",why:"뼈에 직접 신호",items:[
-   {t:"힐 드롭 10회 × 2",d:"발끝으로 섰다가 뒤꿈치 쿵. 무릎 부담은 적고 뼈 자극은 큼",s:"bone"},
-   {t:"스텝 터치 3분",d:"음악 한 곡 틀고 좌우로",s:"sta"},
-   {t:"제자리 통통 뛰기 10회 × 2",d:"줄 없는 줄넘기처럼 2~3cm만 낮게. 앞꿈치로 착지한 뒤 뒤꿈치를 바닥에 톡 닿게 — 이 접촉이 뼈 자극. 무릎 불편한 날은 힐 드롭으로 대체",s:"bone"},
-   {t:"루마니안 데드리프트 12회 × 3",d:"가방에 책 넣고. 엉덩이를 뒤로 빼며 등은 곧게",s:"str"},
-   {t:"월 시트 20~30초 × 2",d:"벽에 기대 앉기. 무릎은 90도까지만",s:"str"}]},
+   {i:"heel-drop",t:"힐 드롭 10회 × 2",d:"발끝으로 섰다가 뒤꿈치 쿵. 무릎 부담은 적고 뼈 자극은 큼",s:"bone"},
+   {i:"step-touch",t:"스텝 터치 3분",d:"음악 한 곡 틀고 좌우로",s:"sta"},
+   {i:"mini-hop",t:"제자리 통통 뛰기 10회 × 2",d:"줄 없는 줄넘기처럼 2~3cm만 낮게. 앞꿈치로 착지한 뒤 뒤꿈치를 바닥에 톡 닿게 — 이 접촉이 뼈 자극. 무릎 불편한 날은 힐 드롭으로 대체",s:"bone"},
+   {i:"rdl-bag",t:"루마니안 데드리프트 12회 × 3",d:"가방에 책 넣고. 엉덩이를 뒤로 빼며 등은 곧게",s:"str"},
+   {i:"wall-sit",t:"월 시트 20~30초 × 2",d:"벽에 기대 앉기. 무릎은 90도까지만",s:"str"}]},
  6:{kind:"러닝 데이",why:"런데이 앱",items:[
-   {t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
-   {t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
-   {t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]}
+   {i:"run-warmup",t:"발목·고관절 워밍업 3분",d:"발목 돌리기 · 무릎 들어 올리기 · 다리 앞뒤 스윙",s:"flex"},
+   {i:"runday",t:"런데이 세션",d:"오늘 회차 그대로. 통증 오면 걷기로 전환",s:"sta"},
+   {i:"run-stretch",t:"종아리·햄스트링 스트레칭 5분",d:"러닝 직후가 제일 잘 늘어남",s:"flex"}]}
 };
 const SIDE=[
- {t:"단백질 3번 챙기기",d:"그릭요거트 · 두부김치 · 후무스 · 닭가슴살 · 생선 중 아무거나",s:"nut"},
- {t:"칼슘 + 비타민 D",d:"우유나 요거트 1회 + 햇빛 15분(또는 보충제)",s:"bone"},
- {t:"물 6잔",d:"텀블러 한 번 채울 때마다 2잔",s:"nut"},
- {t:"가당 음료 0잔",d:"당화혈색소를 되돌리는 가장 빠른 한 칸",s:"nut"}
+ {i:"s:protein",t:"단백질 3번 챙기기",d:"그릭요거트 · 두부김치 · 후무스 · 닭가슴살 · 생선 중 아무거나",s:"nut"},
+ {i:"s:calcium",t:"칼슘 + 비타민 D",d:"우유나 요거트 1회 + 햇빛 15분(또는 보충제)",s:"bone"},
+ {i:"s:water",t:"물 6잔",d:"텀블러 한 번 채울 때마다 2잔",s:"nut"},
+ {i:"s:nosugar",t:"가당 음료 0잔",d:"당화혈색소를 되돌리는 가장 빠른 한 칸",s:"nut"}
 ];
 const DAYNM=["일","월","화","수","목","금","토"];
 const CHAPTERS=[
@@ -443,25 +443,32 @@ const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${Str
 const parse=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
 let S=(()=>{try{return JSON.parse(localStorage.getItem(KEY))||{log:{}}}catch(e){return{log:{}}}})();
 if(!S.log)S.log={};
+if(!S.n)S.n={};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 
 const today=new Date(), tISO=iso(today), wd=today.getDay();
 const done=d=>S.log[d]||[];
 const has=(d,id)=>done(d).includes(id);
-const mainIds=w=>ROUTINE[w].items.map((_,i)=>"m"+w+"-"+i);
-const dayCleared=d=>{const w=parse(d).getDay();const g=done(d);return mainIds(w).every(id=>g.includes(id))};
+const QMAP={},SMAP={};
+Object.keys(ROUTINE).forEach(w=>ROUTINE[w].items.forEach(q=>QMAP[q.i]=q));
+SIDE.forEach(q=>SMAP[q.i]=q);
+const isSide=id=>id.indexOf("s:")===0||/^s\d+$/.test(id);   // 구버전 키(s0..) 포함
+const expOf=id=>isSide(id)?5:10;
+const qOf=id=>QMAP[id]||SMAP[id]||null;                      // 구버전 키는 null → EXP만 인정
+const mainIds=w=>ROUTINE[w].items.map(q=>q.i);
+const mainCount=d=>done(d).filter(x=>!isSide(x)).length;
+const needOf=d=>(S.n&&S.n[d]!=null)?S.n[d]:mainIds(parse(d).getDay()).length;
+const dayCleared=d=>{const n=needOf(d);return n>0&&mainCount(d)>=n};
 
 function totals(){
   let exp=0;const st={bone:0,str:0,flex:0,sta:0,nut:0};let days=0;
   for(const d in S.log){
     const g=S.log[d];if(!g.length)continue;
-    if(g.some(x=>x[0]==="m"))days++;   // 사이드 퀘스트만 한 날은 운동일로 세지 않음
+    if(mainCount(d)>0)days++;   // 사이드 퀘스트만 한 날은 운동일로 세지 않음
     const w=parse(d).getDay();
     g.forEach(id=>{
-      let q=null;
-      if(id[0]==="s")q=SIDE[+id.slice(1)];
-      else{const p=id.slice(1).split("-");q=(ROUTINE[+p[0]]||{items:[]}).items[+p[1]]}
-      if(!q)return;exp+=id[0]==="s"?5:10;st[q.s]+=1;
+      exp+=expOf(id);
+      const q=qOf(id); if(q&&st[q.s]!=null)st[q.s]+=1;
     });
     if(dayCleared(d))exp+=20;
   }
@@ -470,7 +477,7 @@ function totals(){
 function level(exp){let lv=1,need=100,rem=exp;while(rem>=need){rem-=need;lv++;need=100+(lv-1)*20}return{lv,rem,need}}
 function streaks(){
   let cur=0,best=0,run=0;
-  const keys=Object.keys(S.log).filter(d=>S.log[d].some(x=>x[0]==="m")).sort();
+  const keys=Object.keys(S.log).filter(d=>mainCount(d)>0).sort();
   if(keys.length){
     let prev=null;
     keys.forEach(d=>{
@@ -491,7 +498,7 @@ function row(id,q,checked){
   b.dataset.id=id;
   b.innerHTML=`<span class="box"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5"/></svg></span>
     <span class="qbody"><span class="qname">${q.t}</span><span class="qdesc">${q.d}</span></span>
-    <span class="tagcol"><span class="tag">${STATS[q.s].g}</span><span class="rew">+${id[0]==="s"?5:10}</span></span>`;
+    <span class="tagcol"><span class="tag">${STATS[q.s].g}</span><span class="rew">+${expOf(id)}</span></span>`;
   b.onclick=()=>toggle(id,b);
   return b;
 }
@@ -499,7 +506,7 @@ function toggle(id,b){
   const before=level(totals().exp).lv, wasClear=dayCleared(tISO);
   const g=done(tISO).slice();const i=g.indexOf(id);
   if(i>-1)g.splice(i,1);else g.push(id);
-  S.log[tISO]=g;save();
+  S.log[tISO]=g;S.n[tISO]=mainIds(wd).length;save();
   b.setAttribute("aria-pressed",i===-1);
   const after=level(totals().exp).lv;
   render();
@@ -509,7 +516,7 @@ function toggle(id,b){
   }
   if(after>before){toast(`LEVEL UP!\nLV.${after}`);sfx("level");}
   else if(!wasClear&&dayCleared(tISO)){toast("QUEST CLEAR!\n+20 EXP");sfx("clear");}
-  else if(i===-1){toast(`+${id[0]==="s"?5:10} EXP`);sfx("check");}
+  else if(i===-1){toast(`+${expOf(id)} EXP`);sfx("check");}
   else sfx("uncheck");
 }
 let tmr;
@@ -530,13 +537,13 @@ function render(){
   document.getElementById("chapter").textContent=`CHAPTER ${ch}`;
 
   const dq=done(tISO);
-  document.getElementById("dayCount").textContent=`${dq.filter(x=>x[0]==="m").length} / ${ROUTINE[wd].items.length}`;
+  document.getElementById("dayCount").textContent=`${mainCount(tISO)} / ${ROUTINE[wd].items.length}`;
   document.getElementById("dayKind").textContent=ROUTINE[wd].kind;
   document.getElementById("dayWhy").textContent=ROUTINE[wd].why;
   const mq=document.getElementById("mainQuests");mq.innerHTML="";
-  ROUTINE[wd].items.forEach((q,i)=>mq.appendChild(row("m"+wd+"-"+i,q,has(tISO,"m"+wd+"-"+i))));
+  ROUTINE[wd].items.forEach(q=>mq.appendChild(row(q.i,q,has(tISO,q.i))));
   const sq=document.getElementById("sideQuests");sq.innerHTML="";
-  SIDE.forEach((q,i)=>sq.appendChild(row("s"+i,q,has(tISO,"s"+i))));
+  SIDE.forEach(q=>sq.appendChild(row(q.i,q,has(tISO,q.i))));
   const nextQ=mq.querySelector('.q[aria-pressed="false"]')||sq.querySelector('.q[aria-pressed="false"]');
   if(nextQ)nextQ.classList.add("cur");
 
@@ -544,7 +551,7 @@ function render(){
   const ws=weekStart();let cleared=0;const bd=document.getElementById("bossDays");bd.innerHTML="";
   for(let i=0;i<7;i++){
     const d=new Date(ws);d.setDate(ws.getDate()+i);const key=iso(d);
-    const ok=(S.log[key]||[]).some(x=>x[0]==="m");if(ok)cleared++;
+    const ok=mainCount(key)>0;if(ok)cleared++;
     const el=document.createElement("div");el.textContent=DAYNM[d.getDay()];
     if(ok)el.classList.add("on");if(key===tISO)el.classList.add("today");bd.appendChild(el);
   }
@@ -562,7 +569,7 @@ function render(){
   [1,2,3,4,5,6,0].forEach(w=>{
     const r=ROUTINE[w],el=document.createElement("details");
     const d=new Date(ws);d.setDate(ws.getDate()+((w+6)%7));const key=iso(d);
-    const ok=(S.log[key]||[]).some(x=>x[0]==="m");
+    const ok=mainCount(key)>0;
     el.className="day"+(key===tISO?" today":"");
     el.innerHTML=`<summary><span class="chev"></span><span class="wd${ok?" done":""}${key===tISO?" now":""}">${DAYNM[w]}</span>
       <span class="nm">${r.kind}</span><span class="tg">${r.why}</span></summary>
@@ -792,6 +799,19 @@ document.getElementById("replayStory").onclick=openStory;
 
 document.getElementById("crestImg").src=SPRITE.bone;
 document.getElementById("skullImg").src=SPRITE.skull;
+(function migrate(){
+  // v2 이전(수·목 5항목) 시절 기록은 그때 개수로 인정해야 완주 보너스가 유지된다
+  const LEGACY_N={3:5,4:5};
+  let dirty=false;
+  Object.keys(S.log).forEach(d=>{
+    if(S.n[d]!=null)return;
+    const w=parse(d).getDay();
+    const oldKeys=done(d).filter(x=>!isSide(x)).every(x=>/^m\d+-\d+$/.test(x));
+    S.n[d]=(oldKeys&&LEGACY_N[w]!=null)?LEGACY_N[w]:mainIds(w).length;
+    dirty=true;
+  });
+  if(dirty)save();
+})();
 render();
 if(!S.seen)openStory();
 </script>
