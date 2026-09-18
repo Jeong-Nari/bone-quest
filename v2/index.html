@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F0E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bone Quest">
+<title>Bone Quest</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" href="./icon-192.png">
+<link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- HOME -->
+  <section class="view" id="home">
+    <div class="hero">
+      <img class="bg" src="./assets/bg-home.png" alt="">
+      <img class="char" src="./assets/hero.png" alt="모험가">
+      <img class="fire" src="./assets/campfire.png" alt="">
+      <div class="fade"></div>
+    </div>
+    <div class="apphead">
+      <img src="./assets/icons/quest.png" alt="">
+      <div><h1>BONE QUEST</h1><p>1년의 훈련이, 전설을 만든다.</p></div>
+      <button class="iconbtn sp" type="button" id="settingsBtn" aria-label="설정">
+        <img src="./assets/icons/settings.png" alt="">
+      </button>
+    </div>
+    <div class="hello" id="hello"></div>
+    <div class="spacer"></div>
+    <div id="homeBody"></div>
+  </section>
+
+  <!-- 퀘스트 상세 -->
+  <section class="view detail" id="detail" hidden></section>
+
+  <!-- BOSS -->
+  <section class="view" id="boss" hidden></section>
+
+  <!-- LOG -->
+  <section class="view" id="log" hidden></section>
+</div>
+
+<nav class="tabs" aria-label="화면 이동"><div class="tabs-in">
+  <button type="button" data-tab="home" aria-current="true"><img src="./assets/icons/tab-home.png" alt="">Home</button>
+  <button type="button" data-tab="boss"><img src="./assets/icons/tab-boss.png" alt="">Boss</button>
+  <button type="button" data-tab="log"><img src="./assets/icons/tab-log.png" alt="">Log</button>
+</div></nav>
+
+<script type="module" src="./js/ui.js"></script>
+</body>
+</html>
