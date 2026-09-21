@@ -76,6 +76,24 @@ check("체크포인트 기록 저장 구조", () => {
   assert.deepEqual(load(fake, TODAY).state.checkpoints[0], { date: "2026-12-02", muscleMass: 18.4, weight: 52.1, memo: "3개월" });
 });
 
+/* ---- 4단계: 미리보기 이후 v1에서 계속 체크한 기록 합치기 ---- */
+{
+  const m = (() => { const x = new Map(); return { getItem: k => x.get(k) ?? null, setItem: (k, v) => x.set(k, String(v)) }; })();
+  const v1a = structuredClone(v1);
+  m.setItem(KEY_V1, JSON.stringify(v1a));
+  load(m, TODAY);                                           // 미리보기로 2.0을 한 번 열어 v2가 생김
+  const s2 = load(m, TODAY).state; s2.log["2026-09-20"] = ["preview-only"]; save(s2, m);   // 2.0에서 체크한 기록
+  v1a.log["2026-09-19"] = [...(v1a.log["2026-09-19"] ?? []), "later-v1"];                   // 그 뒤 v1에서 계속 체크
+  v1a.log["2026-09-21"] = ["m0-0"];
+  m.setItem(KEY_V1, JSON.stringify(v1a));
+  const r = load(m, TODAY);
+  check("v2가 있어도 v1에 새로 체크한 기록을 합침", () => { assert.ok(r.merged >= 2); assert.ok(r.state.log["2026-09-19"].includes("later-v1")); assert.deepEqual(r.state.log["2026-09-21"], ["m0-0"]); });
+  check("합칠 때 2.0에서 체크한 기록은 그대로", () => assert.deepEqual(r.state.log["2026-09-20"], ["preview-only"]));
+  check("v1이 그대로면 다시 합치지 않음", () => assert.equal(load(m, TODAY).merged, 0));
+  const s3 = load(m, TODAY).state; s3.log["2026-09-21"] = []; delete s3.log["2026-09-21"]; save(s3, m);
+  check("2.0에서 지운 체크는 v1이 바뀌지 않는 한 되살아나지 않음", () => assert.equal(load(m, TODAY).state.log["2026-09-21"], undefined));
+}
+
 /* ---- 결과 ---- */
 const failed = results.filter(([s]) => s !== "ok");
 for (const [s, name] of results) console.log(`${s === "ok" ? "  ✓" : "  ✗"} ${name}`);

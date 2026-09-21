@@ -309,7 +309,7 @@ img{image-rendering:pixelated;max-width:100%}
 .overlay.story{background:rgba(20,22,25,.92)}
 .story .ov-card,.overlay.story .ov-card{background:transparent;box-shadow:none;color:var(--paper);align-items:center;text-align:center}
 .story-art{width:128px;height:128px}
-.story-text{font-size:15px!important;line-height:1.9!important;min-height:7.5em}
+.story-text{font-size:15px!important;line-height:1.9!important;min-height:13.3em}
 .story-foot{display:flex;gap:10px;width:100%;justify-content:space-between}
 .story-foot .btn.ghost{background:transparent;color:var(--paper);border-color:rgba(244,240,230,.4)}
 .story-foot .btn.dark{background:var(--paper);color:var(--dark);border-color:var(--paper)}

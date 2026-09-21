@@ -3,57 +3,9 @@
    - 설치 시 앱 파일 전체를 저장해 두어, 인터넷이 없어도 열린다.
    - 화면·코드(html/js/css/manifest)는 인터넷이 되면 새 것을 받고, 안 되면 저장본을 쓴다.
    - 이미지·폰트는 저장본을 바로 쓴다 (바뀌면 VERSION이 바뀌어 새로 받는다). */
-const VERSION = "a1f37c1dea";
+const VERSION = "__VERSION__";
 const CACHE = `bonequest-v2-${VERSION}`;
-const FILES = [
-  "./",
-  "./apple-touch-icon.png",
-  "./assets/bg-boss.png",
-  "./assets/bg-event.png",
-  "./assets/bg-home.png",
-  "./assets/bone-king.png",
-  "./assets/campfire.png",
-  "./assets/hero.png",
-  "./assets/icons/backup.png",
-  "./assets/icons/bone-fuel.png",
-  "./assets/icons/calcium.png",
-  "./assets/icons/calendar.png",
-  "./assets/icons/camp.png",
-  "./assets/icons/event.png",
-  "./assets/icons/flag.png",
-  "./assets/icons/nosugar.png",
-  "./assets/icons/prophecy.png",
-  "./assets/icons/protein.png",
-  "./assets/icons/quest.png",
-  "./assets/icons/recovery.png",
-  "./assets/icons/rest.png",
-  "./assets/icons/run.png",
-  "./assets/icons/settings.png",
-  "./assets/icons/strength.png",
-  "./assets/icons/tab-boss.png",
-  "./assets/icons/tab-home.png",
-  "./assets/icons/tab-log.png",
-  "./assets/icons/two-min.png",
-  "./assets/icons/water.png",
-  "./assets/inertia-defeated.png",
-  "./assets/inertia.png",
-  "./assets/paper-texture.png",
-  "./css/app.css",
-  "./fonts/cinzel-800.woff2",
-  "./fonts/pretendard-400.woff2",
-  "./fonts/pretendard-700.woff2",
-  "./fonts/pretendard-800.woff2",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./index.html",
-  "./js/data.js",
-  "./js/fx.js",
-  "./js/rules.js",
-  "./js/storage.js",
-  "./js/story.js",
-  "./js/ui.js",
-  "./manifest.webmanifest"
-];
+const FILES = __FILES__;
 
 self.addEventListener("install", (e) => {
   e.waitUntil(

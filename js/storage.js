@@ -14,7 +14,7 @@ export function emptyState() {
     two: {},          // { "2026-09-18": true }  2분 퀘스트
     checkpoints: [],  // [{ date, muscleMass, weight, memo }]
     settings: { sfx: true, bgm: false, track: 0 },
-    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null, lastCamp: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
+    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null, lastCamp: null, v1Sync: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
     savedAt: null,
   };
 }
@@ -67,6 +67,7 @@ export function normalize(raw) {
       backupPromptWeek: isDate(raw.flags?.backupPromptWeek) ? raw.flags.backupPromptWeek : null,
       eventsFrom: isDate(raw.flags?.eventsFrom) ? raw.flags.eventsFrom : null,
       lastCamp: Number.isInteger(raw.flags?.lastCamp) ? raw.flags.lastCamp : null,   // 마지막으로 본 CAMP 레벨 (하락 알림용)
+      v1Sync: typeof raw.flags?.v1Sync === "string" ? raw.flags.v1Sync : null,       // 마지막으로 합친 v1 기록의 지문
     },
     savedAt: typeof raw.savedAt === "string" ? raw.savedAt : (typeof raw.saved === "string" ? raw.saved : null),
   };
@@ -82,21 +83,64 @@ export function migrateV1(rawV1, today = new Date().toISOString().slice(0, 10)) 
 }
 
 /* ---------- localStorage ---------- */
+/** 문자열 지문 (v1 기록이 바뀌었는지 비교용) */
+export function fingerprint(text) {
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return `${text.length}:${(h >>> 0).toString(36)}`;
+}
+
+/** v1 기록을 v2에 합친다. 날짜별 항목·휴식·2분 퀘스트를 합집합으로 — 어느 쪽 기록도 지우지 않는다.
+ *  돌려주는 값: 새로 들어온 항목 수 */
+export function mergeV1Into(state, rawV1) {
+  const v1 = normalize(rawV1);
+  let added = 0;
+  for (const [date, items] of Object.entries(v1.log)) {
+    const cur = state.log[date] ?? [];
+    const merged = [...new Set([...cur, ...items])];
+    added += merged.length - cur.length;
+    if (merged.length) state.log[date] = merged;
+  }
+  for (const key of ["rest", "two"]) {
+    for (const date of Object.keys(v1[key])) if (!state[key][date]) { state[key][date] = true; added++; }
+  }
+  return added;
+}
+
+/** 실행 시 불러오기.
+ *  - v2가 없고 v1만 있으면: v1을 변환해 v2로 저장 (v1 키는 남긴다)
+ *  - v2가 있어도 v1 기록이 마지막으로 합친 뒤 바뀌었으면: v1 기록을 합친다
+ *    (2.0 미리보기를 열어 본 뒤 v1에서 계속 운동을 체크한 경우 대비) */
 export function load(storage = globalThis.localStorage, today = new Date().toISOString().slice(0, 10)) {
-  if (!storage) return { state: emptyState(), migrated: false };
+  if (!storage) return { state: emptyState(), migrated: false, merged: 0 };
+  let v1Text = null;
+  try { v1Text = storage.getItem(KEY_V1); } catch { /* noop */ }
+  let v1Raw = null;
+  try { v1Raw = v1Text ? JSON.parse(v1Text) : null; } catch { v1Raw = null; }
+  const sig = v1Raw ? fingerprint(v1Text) : null;
+
+  let v2 = null;
   try {
-    const v2 = storage.getItem(KEY_V2);
-    if (v2) return { state: normalize(JSON.parse(v2)), migrated: false };
-  } catch { /* 손상된 데이터는 아래 v1 경로 / 빈 상태로 */ }
-  try {
-    const v1 = storage.getItem(KEY_V1);
-    if (v1) {
-      const state = migrateV1(JSON.parse(v1), today);
-      save(state, storage);                       // 변환 결과를 v2 키에 저장 (v1 키는 지우지 않는다)
-      return { state, migrated: true };
+    const text = storage.getItem(KEY_V2);
+    if (text) v2 = normalize(JSON.parse(text));
+  } catch { v2 = null; /* 손상된 데이터는 아래 v1 경로 / 빈 상태로 */ }
+
+  if (v2) {
+    if (v1Raw && v2.flags.v1Sync !== sig) {
+      const merged = mergeV1Into(v2, v1Raw);
+      v2.flags.v1Sync = sig;
+      save(v2, storage);
+      return { state: v2, migrated: false, merged };
     }
-  } catch { /* noop */ }
-  return { state: emptyState(), migrated: false };
+    return { state: v2, migrated: false, merged: 0 };
+  }
+  if (v1Raw) {
+    const state = migrateV1(v1Raw, today);
+    state.flags.v1Sync = sig;
+    save(state, storage);                       // 변환 결과를 v2 키에 저장 (v1 키는 지우지 않는다)
+    return { state, migrated: true, merged: 0 };
+  }
+  return { state: emptyState(), migrated: false, merged: 0 };
 }
 
 export function save(state, storage = globalThis.localStorage) {

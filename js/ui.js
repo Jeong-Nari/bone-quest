@@ -20,7 +20,8 @@ const CHECK = '<svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5"/></svg>';
 const md = (iso) => `${+iso.slice(5, 7)}/${+iso.slice(8, 10)}`;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-let state = load().state;
+const boot = load();                 // v1만 있으면 변환, v1에 새 기록이 있으면 합침
+let state = boot.state;
 let today = todayISO();
 let tab = "home";
 let calMonth = today.slice(0, 7);
@@ -478,6 +479,7 @@ function confirmImport(result) {
     state.settings = prev.settings;                     // 사운드 설정은 이 기기 것을 유지
     state.flags.prologueSeen = prev.flags.prologueSeen || state.flags.prologueSeen;
     state.flags.backupPromptWeek = prev.flags.backupPromptWeek;
+    state.flags.v1Sync = prev.flags.v1Sync;                 // 이 기기의 v1 합치기 상태도 유지
     state.flags.eventsFrom = state.flags.eventsFrom ?? prev.flags.eventsFrom;
     state.flags.lastCamp = compute(state, today).camp;
     persist();
@@ -579,6 +581,8 @@ setSoundSettings(state.settings);
 render();
 (function startup() {
   const c = compute(state, today);
+  if (boot.merged > 0)
+    toast({ title: "RECORDS SYNCED", text: "본 어드벤처(v1)에서 체크한 기록을 가져왔습니다.", sub: `${boot.merged}개 항목`, icon: ICON("backup") });
   const last = state.flags.lastCamp;
   if (last != null && c.camp < last)
     toast({ title: "CAMPFIRE RESTS", text: "잠시 불꽃이 약해졌습니다.", sub: `Lv. ${last} → Lv. ${c.camp}`, icon: ICON("rest") });
@@ -589,5 +593,10 @@ render();
   if (state.settings.bgm) window.addEventListener("pointerdown", () => bgmStart(), { once: true });   // 브라우저 정책상 첫 터치 후 재생
 })();
 document.addEventListener("visibilitychange", () => { if (document.hidden) bgmStop(); else if (state.settings.bgm) bgmStart(); });
+
+/* ---------- 오프라인 (서비스워커) ---------- */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http") && !window.__SINGLE_FILE__) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
 
 export { state, render };
