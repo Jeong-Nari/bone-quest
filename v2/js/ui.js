@@ -10,6 +10,8 @@ import {
   mainsOf, mainCount, halfCount, logOf, expOfItem, eventOf, eventsActiveOn, isDayCleared, parseDate, toISO,
 } from "./rules.js";
 import { load, save, exportJSON, backupFileName, parseBackup } from "./storage.js";
+import { toast, openOverlay, closeOverlay, sfx, bgmStart, bgmStop, setSoundSettings, TRACKS } from "./fx.js";
+import { PROLOGUE, CHAPTERS, weeksSinceStart } from "./story.js";
 
 const DAY = ["일", "월", "화", "수", "목", "금", "토"];
 const ICON = (name) => `./assets/icons/${name}.png`;
@@ -308,9 +310,10 @@ function renderLog(c) {
 
     <section class="card backup"><img src="${ICON("backup")}" alt="">
       <div><b>백업하기</b><span class="sub">기록은 이 폰에만 저장됩니다</span></div>
-      <button class="btn" type="button" id="exportBtn">내보내기</button>
+      <div class="bk-btns"><button class="btn" type="button" id="exportBtn">내보내기</button>
+        <button class="btn ghost" type="button" id="importBtn">불러오기</button></div>
     </section>
-    <div class="msg sub" id="backupMsg" hidden></div>`;
+    `;
 }
 
 /* ---------- 그리기 / 이동 ---------- */
@@ -326,37 +329,83 @@ function render() {
 
   for (const id of ["home", "boss", "log", "detail"]) $(id).hidden = detailKind ? id !== "detail" : id !== tab;
   for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-current", String(b.dataset.tab === tab));
-  document.documentElement.dataset.tab = detailKind ? "detail" : tab;
+  document.documentElement.dataset.screen = detailKind ? "detail" : tab;
 }
 
 function go(next) { tab = next; detailKind = null; window.scrollTo({ top: 0 }); render(); }
+
+/* ---------- 행동 → 저장 → 다시 계산 → 피드백 ---------- */
+function act(mutate) {
+  const before = compute(state, today);
+  const wasRecognized = isRecognized(state, today);
+  mutate();
+  persist();
+  render();
+  const after = compute(state, today);
+  feedback(before, after, wasRecognized);
+}
+
+function feedback(before, after, wasRecognized) {
+  const big = [];
+  if (!before.currentWeek.killed && after.currentWeek.killed)
+    big.push({ title: "BOSS DEFEATED", text: "관성을 물리쳤습니다.", sub: `+${EXP.bossKill} EXP`, icon: "./assets/inertia-defeated.png", sound: "boss" });
+  if (after.level > before.level)
+    big.push({ title: "LEVEL UP!", text: `LV. ${before.level} → LV. ${after.level}`, icon: ICON("quest"), sound: "level" });
+  if (after.camp > before.camp)
+    big.push({ title: "CAMPFIRE GROWS", text: "캠프가 한 단계 성장했습니다.", sub: `CAMP Lv. ${before.camp} → Lv. ${after.camp}`, icon: "./assets/campfire.png", sound: "camp" });
+  const comeback = (h) => h.campHistory.filter((x) => x.kind === "comeback").length;
+  if (comeback(after) > comeback(before))
+    big.push({ title: "WELCOME BACK", text: "캠프파이어가 다시 타오릅니다.", sub: `+${EXP.comeback} EXP`, icon: "./assets/campfire.png", sound: "camp" });
+
+  state.flags.lastCamp = after.camp;
+  persist();
+
+  if (big.length) {
+    sfx(big[0].sound);
+    toast(...big);
+    return;
+  }
+  const nowRecognized = isRecognized(state, today);
+  const diff = after.exp - before.exp;
+  if (!wasRecognized && nowRecognized) {
+    sfx("clear");
+    toast({ title: "세션 인정", text: `관성에게 −${DMG[sessionType(today)]} DMG`, sub: diff ? `+${diff} EXP` : "", small: true });
+  } else if (diff > 0) { sfx("check"); toast({ title: `+${diff} EXP`, small: true }); }
+  else if (diff < 0) { sfx("uncheck"); toast({ title: `${diff} EXP`, small: true }); }
+  else sfx("check");
+}
 
 /* ---------- 입력 ---------- */
 document.addEventListener("click", (e) => {
   const toggle = e.target.closest("[data-toggle]");
   if (toggle) {
     const id = toggle.dataset.toggle;
-    const list = state.log[today] ? [...state.log[today]] : [];
-    const i = list.indexOf(id);
-    if (i > -1) list.splice(i, 1);
-    else {
-      list.push(id);
-      if (!isSide(id) && state.rest[today]) delete state.rest[today];   // REST 자동 취소 + 사용권 복구
-    }
-    if (list.length) state.log[today] = list; else delete state.log[today];
-    persist(); render();
+    act(() => {
+      const list = state.log[today] ? [...state.log[today]] : [];
+      const i = list.indexOf(id);
+      if (i > -1) list.splice(i, 1);
+      else {
+        list.push(id);
+        if (!isSide(id) && state.rest[today]) delete state.rest[today];   // REST 자동 취소 + 사용권 복구
+      }
+      if (list.length) state.log[today] = list; else delete state.log[today];
+    });
     return;
   }
   const open = e.target.closest("[data-open]")?.dataset.open;
-  if (open) { detailKind = open === "close" ? null : open; window.scrollTo({ top: 0 }); render(); return; }
+  if (open) { detailKind = open === "close" ? null : open; window.scrollTo({ top: 0 }); render(); sfx("tab"); return; }
 
-  const act = e.target.closest("[data-act]")?.dataset.act;
-  if (act === "rest") { state.rest[today] = true; persist(); render(); return; }
-  if (act === "unrest") { delete state.rest[today]; persist(); render(); return; }
-  if (act === "two") { state.two[today] = true; detailKind = null; persist(); render(); return; }
+  const actName = e.target.closest("[data-act]")?.dataset.act;
+  if (actName === "rest") {
+    act(() => { state.rest[today] = true; });
+    toast({ title: "REST DAY", text: "오늘은 회복의 날입니다.", sub: "CAMP 유지", icon: ICON("rest") });
+    return;
+  }
+  if (actName === "unrest") { act(() => { delete state.rest[today]; }); return; }
+  if (actName === "two") { act(() => { state.two[today] = true; detailKind = null; }); return; }
 
   const tabBtn = e.target.closest("[data-tab]")?.dataset.tab;
-  if (tabBtn) { go(tabBtn); return; }
+  if (tabBtn) { sfx("tab"); go(tabBtn); return; }
 
   const month = e.target.closest("[data-month]")?.dataset.month;
   if (month) {
@@ -367,13 +416,16 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("#todayBtn")) { calMonth = today.slice(0, 7); render(); return; }
-
   if (e.target.closest("#exportBtn")) { exportBackup(); return; }
+  if (e.target.closest("#importBtn")) { pickBackup(); return; }
+  if (e.target.closest("#settingsBtn")) { openSettings(); return; }
+  if (e.target.closest("#bossHelp")) { openBossHelp(); return; }
+  if (e.target.closest("#prophecyBtn")) { openProphecy(); return; }
+  if (e.target.closest("[data-close]")) { closeOverlay(); return; }
 });
 
-/* ---------- 백업 내보내기 (3단계에서 불러오기·알림 추가) ---------- */
-function exportBackup() {
-  const msg = $("backupMsg");
+/* ---------- 백업 내보내기 ---------- */
+function exportBackup({ quiet = false } = {}) {
   try {
     const blob = new Blob([exportJSON(state, today)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -381,17 +433,161 @@ function exportBackup() {
     a.href = url; a.download = backupFileName(today);
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
-    msg.hidden = false;
-    msg.textContent = `${backupFileName(today)} 파일을 내려받았습니다.`;
+    if (!quiet) toast({ title: "BACKUP", text: `${backupFileName(today)} 저장`, icon: ICON("backup"), small: true });
+    return true;
   } catch {
-    msg.hidden = false;
-    msg.textContent = "이 브라우저에서는 파일 저장이 막혀 있습니다.";
+    toast({ title: "저장 실패", text: "이 브라우저에서는 파일 저장이 막혀 있습니다.", small: true });
+    return false;
   }
+}
+
+/* ---------- 백업 불러오기 ---------- */
+function pickBackup() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json,.json";
+  input.onchange = () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => confirmImport(parseBackup(String(reader.result)));
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function confirmImport(result) {
+  if (!result.ok) {
+    openOverlay(`<div class="ov-h"><img src="${ICON("backup")}" alt="">불러올 수 없습니다</div>
+      <p>${esc(result.reason)}</p>
+      <div class="ov-acts"><button class="btn" type="button" data-close>확인</button></div>`);
+    return;
+  }
+  const cur = Object.keys(state.log).length;
+  const s = result.summary;
+  const incoming = compute(result.state, today);
+  openOverlay(`<div class="ov-h"><img src="${ICON("backup")}" alt="">백업 불러오기</div>
+    <p>이 파일에는 <b>${s.days}일치</b> 기록이 있습니다${s.savedAt ? ` (${s.savedAt} 저장)` : ""}.<br>
+      불러오면 LV. ${incoming.level} · CAMP Lv. ${incoming.camp}가 됩니다.</p>
+    <p class="warn">지금 이 폰의 ${cur}일치 기록은 이 파일로 바뀝니다. 필요하면 먼저 내보내기로 저장해 두세요.</p>
+    <div class="ov-acts"><button class="btn" type="button" id="importOk">불러오기</button>
+      <button class="btn ghost" type="button" data-close>취소</button></div>`);
+  document.getElementById("importOk").onclick = () => {
+    const prev = state;
+    state = result.state;
+    state.settings = prev.settings;                     // 사운드 설정은 이 기기 것을 유지
+    state.flags.prologueSeen = prev.flags.prologueSeen || state.flags.prologueSeen;
+    state.flags.backupPromptWeek = prev.flags.backupPromptWeek;
+    state.flags.eventsFrom = state.flags.eventsFrom ?? prev.flags.eventsFrom;
+    state.flags.lastCamp = compute(state, today).camp;
+    persist();
+    closeOverlay();
+    render();
+    sfx("level");
+    toast({ title: "LOAD OK", text: `${s.days}일치 기록을 불러왔습니다.`, icon: ICON("backup") });
+  };
+}
+
+/* ---------- 새 주 백업 알림: 그 주 첫 실행 1회, 기록 없는 첫 주는 제외 ---------- */
+function maybeWeeklyBackupPrompt() {
+  const monday = mondayOf(today);
+  if (state.flags.backupPromptWeek === monday) return false;
+  const hasPast = Object.keys(state.log).some((d) => d < monday);
+  if (!hasPast) return false;
+  const lastWeek = `${md(addDays(monday, -7))}–${md(addDays(monday, -1))}`;
+  openOverlay(`<div class="ov-h"><img src="${ICON("tab-log")}" alt="">NEW WEEK</div>
+    <p>지난 주(${lastWeek}) 기록을 백업해 둘까요?<br><span class="sub">기록은 이 폰에만 저장됩니다. 닫으면 이번 주에는 다시 묻지 않습니다.</span></p>
+    <div class="ov-acts"><button class="btn" type="button" id="wkBackup">BACKUP</button>
+      <button class="btn ghost" type="button" data-close>나중에</button></div>`,
+    { onClose: () => { state.flags.backupPromptWeek = monday; persist(); } });
+  document.getElementById("wkBackup").onclick = () => { exportBackup(); closeOverlay(); };
+  return true;
+}
+
+/* ---------- 설정 (사운드) ---------- */
+function openSettings() {
+  const s = state.settings;
+  openOverlay(`<div class="ov-h"><img src="${ICON("settings")}" alt="">설정</div>
+    <div class="set-row"><span>효과음</span><button class="switch" type="button" id="sfxT" aria-pressed="${s.sfx}"><i></i></button></div>
+    <div class="set-row"><span>BGM</span><button class="switch" type="button" id="bgmT" aria-pressed="${s.bgm}"><i></i></button></div>
+    <div class="set-row col"><span>BGM 트랙</span><div class="tracks">${TRACKS.map((t, i) =>
+      `<button type="button" class="trk" data-track="${i}" aria-pressed="${s.track === i}">${t.name}</button>`).join("")}</div></div>
+    <div class="set-row col"><span>이야기</span><button class="btn ghost" type="button" id="replayPrologue">프롤로그 다시 보기</button></div>
+    <div class="ov-acts"><button class="btn" type="button" data-close>닫기</button></div>`, { kind: "sheet" });
+  const ov = document.getElementById("overlay");
+  ov.querySelector("#sfxT").onclick = (e) => { s.sfx = !s.sfx; e.currentTarget.setAttribute("aria-pressed", s.sfx); persist(); if (s.sfx) sfx("check"); };
+  ov.querySelector("#bgmT").onclick = (e) => { s.bgm = !s.bgm; e.currentTarget.setAttribute("aria-pressed", s.bgm); persist(); s.bgm ? bgmStart() : bgmStop(); };
+  ov.querySelectorAll("[data-track]").forEach((b) => (b.onclick = () => {
+    s.track = Number(b.dataset.track); persist();
+    ov.querySelectorAll("[data-track]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    if (s.bgm) bgmStart();
+  }));
+  ov.querySelector("#replayPrologue").onclick = () => { closeOverlay(); openPrologue(); };
+}
+
+/* ---------- BOSS 규칙 ---------- */
+function openBossHelp() {
+  openOverlay(`<div class="ov-h"><img src="${ICON("tab-boss")}" alt="">관성과 싸우는 법</div>
+    <ul class="rules">
+      <li>매주 월요일 HP ${BOSS_HP}으로 되살아납니다.</li>
+      <li>근력 세션 −${DMG.STR} · 러닝 세션 −${DMG.RUN} · 리커버리 −${DMG.REC}</li>
+      <li>근력·리커버리는 메인 동작 50% 이상, 러닝은 Runday 완료로 인정됩니다.</li>
+      <li>처치하면 +${EXP.bossKill} EXP. 놓친 주는 패널티 없이 넘어갑니다.</li>
+      <li>이번 주 핵심 목표는 근력 세션 3회입니다.</li>
+    </ul>
+    <div class="ov-acts"><button class="btn" type="button" data-close>알겠어요</button></div>`, { kind: "sheet" });
+}
+
+/* ---------- 프롤로그 · 예언서 ---------- */
+function openPrologue(onDone) {
+  let page = 0;
+  const paint = () => {
+    const ov = openOverlay(`<div class="story">
+        <img class="story-art" src="./assets/bone-king.png" alt="">
+        <p class="story-text">${esc(PROLOGUE[page]).replace(/\n/g, "<br>")}</p>
+        <div class="story-foot"><button class="btn ghost" type="button" id="storySkip">건너뛰기</button>
+          <button class="btn dark" type="button" id="storyNext">${page < PROLOGUE.length - 1 ? "계속 ›" : "여정을 시작한다"}</button></div>
+      </div>`, { kind: "story" });
+    ov.querySelector("#storyNext").onclick = () => { if (page < PROLOGUE.length - 1) { page++; paint(); sfx("tab"); } else finish(); };
+    ov.querySelector("#storySkip").onclick = finish;
+  };
+  const finish = () => { closeOverlay(); state.flags.prologueSeen = true; persist(); sfx("level"); onDone?.(); };
+  paint();
+}
+
+function openProphecy() {
+  const weeks = weeksSinceStart(today);
+  const chapters = CHAPTERS.map((ch, i) => {
+    const open = weeks >= ch.startWeek;
+    return `<div class="chapter ${open ? "" : "locked"}"><span class="k">CHAPTER ${i + 1}</span>
+      <b>${open ? esc(ch.title) : "???"}</b><p>${open ? esc(ch.text) : `${ch.startWeek}주차에 열립니다.`}</p></div>`;
+  }).join("");
+  openOverlay(`<div class="ov-h"><img src="./assets/bone-king.png" alt="" style="width:40px;height:40px">골왕의 예언서</div>
+    <p class="sub">원정 ${weeks + 1}주차 · 봉인이 풀리는 날 2027-08-21</p>
+    <div class="chapters">${chapters}</div>
+    <div class="ov-acts"><button class="btn ghost" type="button" id="prophecyPrologue">프롤로그 보기</button>
+      <button class="btn" type="button" data-close>닫기</button></div>`, { kind: "sheet" });
+  document.getElementById("prophecyPrologue").onclick = () => { closeOverlay(); openPrologue(); };
 }
 
 /* 날짜가 넘어가면 다시 그린다 (자정에 앱을 켜 둔 경우) */
 setInterval(() => { if (todayISO() !== today) { calMonth = todayISO().slice(0, 7); render(); } }, 60_000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden && todayISO() !== today) render(); });
 
+/* ---------- 시작 ---------- */
+setSoundSettings(state.settings);
 render();
-export { state, render, parseBackup };
+(function startup() {
+  const c = compute(state, today);
+  const last = state.flags.lastCamp;
+  if (last != null && c.camp < last)
+    toast({ title: "CAMPFIRE RESTS", text: "잠시 불꽃이 약해졌습니다.", sub: `Lv. ${last} → Lv. ${c.camp}`, icon: ICON("rest") });
+  state.flags.lastCamp = c.camp;
+  persist();
+  if (!state.flags.prologueSeen) openPrologue(() => maybeWeeklyBackupPrompt());
+  else maybeWeeklyBackupPrompt();
+  if (state.settings.bgm) window.addEventListener("pointerdown", () => bgmStart(), { once: true });   // 브라우저 정책상 첫 터치 후 재생
+})();
+document.addEventListener("visibilitychange", () => { if (document.hidden) bgmStop(); else if (state.settings.bgm) bgmStart(); });
+
+export { state, render };

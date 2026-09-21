@@ -16,12 +16,12 @@
   --disp:"Cinzel","Pretendard",Georgia,serif;
   --r:11px;
   --shadow:0 1px 0 rgba(39,38,34,.08),0 2px 6px rgba(39,38,34,.06),inset 0 0 18px rgba(140,90,35,.11),inset 0 1px 0 rgba(255,255,255,.35);
-  --tab-h:calc(62px + env(safe-area-inset-bottom,0px));
+  --tab-h:calc(72px + env(safe-area-inset-bottom,0px));
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{min-height:100%;background-color:var(--paper);background-image:var(--tex);background-size:256px 256px;background-blend-mode:multiply;color:var(--dark)}
-html[data-tab="boss"]{background:var(--night)}
+html[data-screen="boss"]{background:var(--night)}
 body{margin:0;min-height:100%}
 body{font-family:var(--ui);font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%;overscroll-behavior-y:contain;background:transparent}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -31,7 +31,7 @@ img{image-rendering:pixelated;max-width:100%}
 
 /* ---------- 앱 틀 ---------- */
 .app{max-width:460px;margin:0 auto;min-height:100%;position:relative;display:flex;flex-direction:column}
-.view{flex:1;display:flex;flex-direction:column;gap:12px;padding:0 12px var(--tab-h);position:relative;z-index:2}
+.view{flex:1;display:flex;flex-direction:column;gap:12px;padding:0 12px calc(var(--tab-h) + 24px);position:relative;z-index:2}
 .view[hidden]{display:none!important}
 
 .apphead{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 4px 6px}
@@ -255,5 +255,63 @@ img{image-rendering:pixelated;max-width:100%}
 .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--ink2);padding:4px 0}
 .tabs img{width:24px;height:24px}
 .tabs button[aria-current="true"]{color:var(--moss-2);font-weight:800}
+
+
+/* ---------- 3단계: 토스트 · 오버레이 · 설정 · 이야기 ---------- */
+.bk-btns{margin-left:auto;display:flex;gap:6px}
+.bk-btns .btn{white-space:nowrap;padding:7px 11px;font-size:12.5px}
+.backup .btn{margin-left:0}
+
+.toast{position:fixed;left:50%;top:38%;z-index:60;width:min(320px,calc(100vw - 48px));transform:translate(-50%,10px);
+  background:var(--dark);color:var(--paper);border-radius:14px;padding:18px 16px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 12px 32px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast img{width:40px;height:40px;margin-bottom:2px}
+.toast b{font-weight:800;font-size:18px;letter-spacing:.04em}
+.toast span{font-size:13px}
+.toast em{font-style:normal;font-weight:800;font-size:14.5px;color:var(--ember);margin-top:2px}
+.toast.small{top:auto;bottom:calc(var(--tab-h) + 18px);padding:10px 16px;border-radius:999px;flex-direction:row;gap:8px;width:auto;max-width:calc(100vw - 48px)}
+.toast.small b{font-size:14px}
+.toast.small img{width:20px;height:20px;margin:0}
+.toast.small em{font-size:13px;margin:0}
+
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(31,34,38,.55);display:grid;place-items:center;padding:18px;opacity:0;transition:opacity .15s}
+.overlay.show{opacity:1}
+.overlay.sheet{place-items:end center;padding:0}
+.ov-card{width:100%;max-width:420px;max-height:88vh;overflow:auto;background-color:var(--paper);background-image:var(--tex);background-size:256px 256px;background-blend-mode:multiply;
+  border-radius:16px;padding:18px 16px;box-shadow:0 14px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:10px}
+.sheet .ov-card{border-radius:18px 18px 0 0;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.ov-h{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px}
+.ov-h img{width:28px;height:28px}
+.ov-card p{margin:0;font-size:13.5px;line-height:1.6}
+.ov-card .warn{font-size:12.5px;color:#9A4A20;background:rgba(216,123,73,.12);border-radius:8px;padding:8px 10px}
+.ov-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-top:1px solid var(--paper-2);font-weight:700;font-size:14px}
+.set-row.col{flex-direction:column;align-items:stretch}
+.switch{width:46px;height:26px;border-radius:13px;background:var(--moss-track);position:relative;flex:none;transition:background .15s}
+.switch i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--paper);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s}
+.switch[aria-pressed="true"]{background:var(--moss)}
+.switch[aria-pressed="true"] i{left:23px}
+.tracks{display:flex;flex-wrap:wrap;gap:6px}
+.trk{font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;border:1px solid var(--line-strong);background:var(--paper)}
+.trk[aria-pressed="true"]{background:var(--moss);color:var(--paper);border-color:var(--moss-2)}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+
+.chapters{display:flex;flex-direction:column;gap:8px}
+.chapter{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.25)}
+.chapter .k{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--ink2)}
+.chapter b{display:block;font-weight:800;font-size:15px;margin:2px 0 3px}
+.chapter p{font-size:12.5px}
+.chapter.locked{opacity:.6}
+
+.overlay.story{background:rgba(20,22,25,.92)}
+.story .ov-card,.overlay.story .ov-card{background:transparent;box-shadow:none;color:var(--paper);align-items:center;text-align:center}
+.story-art{width:128px;height:128px}
+.story-text{font-size:15px!important;line-height:1.9!important;min-height:7.5em}
+.story-foot{display:flex;gap:10px;width:100%;justify-content:space-between}
+.story-foot .btn.ghost{background:transparent;color:var(--paper);border-color:rgba(244,240,230,.4)}
+.story-foot .btn.dark{background:var(--paper);color:var(--dark);border-color:var(--paper)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

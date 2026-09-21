@@ -14,7 +14,7 @@ export function emptyState() {
     two: {},          // { "2026-09-18": true }  2분 퀘스트
     checkpoints: [],  // [{ date, muscleMass, weight, memo }]
     settings: { sfx: true, bgm: false, track: 0 },
-    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
+    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null, lastCamp: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
     savedAt: null,
   };
 }
@@ -66,6 +66,7 @@ export function normalize(raw) {
       prologueSeen: !!(raw.flags?.prologueSeen ?? raw.seen),
       backupPromptWeek: isDate(raw.flags?.backupPromptWeek) ? raw.flags.backupPromptWeek : null,
       eventsFrom: isDate(raw.flags?.eventsFrom) ? raw.flags.eventsFrom : null,
+      lastCamp: Number.isInteger(raw.flags?.lastCamp) ? raw.flags.lastCamp : null,   // 마지막으로 본 CAMP 레벨 (하락 알림용)
     },
     savedAt: typeof raw.savedAt === "string" ? raw.savedAt : (typeof raw.saved === "string" ? raw.saved : null),
   };
