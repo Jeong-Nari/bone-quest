@@ -326,6 +326,7 @@ function render() {
 
   for (const id of ["home", "boss", "log", "detail"]) $(id).hidden = detailKind ? id !== "detail" : id !== tab;
   for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-current", String(b.dataset.tab === tab));
+  document.documentElement.dataset.tab = detailKind ? "detail" : tab;
 }
 
 function go(next) { tab = next; detailKind = null; window.scrollTo({ top: 0 }); render(); }
