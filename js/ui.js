@@ -3,7 +3,7 @@
 
 import {
   ROUTINE, FUEL, TWO_MIN, STATS, TYPE_NAME, DMG, BOSS_HP, EXP,
-  TWO_MIN_PER_WEEK, REST_PER_WEEK, RUNDAY_ID, START,
+  TWO_MIN_PER_WEEK, REST_PER_WEEK, RUNDAY_ID, START, WORLD, WORLD_UNLOCK, METRICS,
 } from "./data.js";
 import {
   compute, todayISO, dow, addDays, mondayOf, sessionType, isRecognized, isSide,
@@ -123,6 +123,113 @@ function renderHome(c) {
   $("homeBody").innerHTML = resting
     ? `${restBlock}${fuel}${lvcamp}<div class="quiet">관성 HP ${week.hp} / ${BOSS_HP} · 오늘 보스 공격 없음</div>`
     : `${quest}${pair}${fuel}${lvcamp}${event}${bossCard}`;
+}
+
+/* ---------- WORLD ---------- */
+const STAR = (n) => `<span class="stars" aria-label="별 ${n}개">${"★".repeat(n)}${"☆".repeat(3 - n)}</span>`;
+
+function cpRows(c) {
+  const open = c.worldUnlock.unlocked;
+  return c.checkpoints.map((cp) => {
+    const r = cp.record;
+    if (!open) return `<div class="cprow plain"><span class="k">${cp.label}</span>
+      <span class="dt num">${cp.date.replaceAll("-", ".")}</span>
+      <span class="s">${cp.dday > 0 ? `D-${cp.dday}` : cp.note}</span><span class="go"></span></div>`;
+    const vals = r ? METRICS.filter((m) => r[m.id] != null).map((m) => `${m.short ?? m.label} ${r[m.id]}${m.unit === "T" ? "" : m.unit}`).join(" · ") : "";
+    return `<button class="cprow${r ? " has" : ""}" type="button" data-cp="${cp.date}">
+      <span class="k">${cp.label}</span>
+      <span class="dt num">${cp.date.replaceAll("-", ".")}</span>
+      <span class="s">${r ? esc(vals || r.memo || "기록됨") : cp.dday > 0 ? `D-${cp.dday}` : cp.note}</span>
+      <span class="go">${r ? "✎" : "＋"}</span></button>`;
+  }).join("");
+}
+
+function renderWorld(c) {
+  const w = c.world;
+  const bar = (pct) => `<div class="bar"><i style="width:${pct}%"></i></div>`;
+
+  const cur = `<section class="card region now">
+    <div class="rhead"><span class="k">지역 ${w.region} / ${WORLD.regions}</span>
+      <span class="dt num">${md(w.from)}–${md(w.to)}${w.daysLeft != null ? ` · 남은 ${w.daysLeft}일` : ""}</span></div>
+    <h3>${esc(w.name)}</h3>
+    <p class="rdesc">${esc(w.desc)}</p>
+    ${bar(w.percent)}
+    <div class="rnums">
+      <span><img src="${ICON("quest")}" alt="">인정일 <b class="num">${w.recognized} / ${w.need}</b></span>
+      <span><img src="${ICON("tab-boss")}" alt="">관성 처치 <b class="num">${w.bosses} / ${w.bossNeed}</b></span>
+      <span>${STAR(w.stars)}</span>
+    </div>
+    <div class="rulenote">※ 진행률은 그 달에 세션을 인정받은 날 수로만 오릅니다.</div>
+  </section>`;
+
+  const next = w.next ? `<section class="card nextr">
+    <div class="sec"><img src="${ICON("flag")}" alt="">다음 지역<span class="r">${md(w.next.from)} 열림</span></div>
+    <div class="nx"><b>${esc(w.next.name)}</b><span class="sub">${esc(w.next.desc)}</span></div>
+  </section>` : `<section class="card nextr"><div class="sec"><img src="${ICON("prophecy")}" alt="">마지막 지역</div>
+    <div class="nx"><b>여정의 끝</b><span class="sub">${EXAM_TEXT}</span></div></section>`;
+
+  const cps = `<section class="card"><div class="sec"><img src="${ICON("flag")}" alt="">체크포인트<span class="r">눌러서 기록</span></div>
+    <div class="cplist">${cpRows(c)}</div>
+  </section>`;
+
+  const past = w.list.filter((r) => r.state === "past").reverse();
+  const later = w.list.filter((r) => r.state === "future");
+  const log = `<section class="card"><div class="sec"><img src="${ICON("calendar")}" alt="">지나온 지역<span class="r">별 ${w.totalStars}개</span></div>
+    ${past.length ? past.map((r) => `<div class="prow"><span class="n num">${r.region}</span>
+      <span class="nm">${esc(r.name)}</span>${STAR(r.stars)}<span class="p num">${r.recognized} / ${r.need}</span></div>`).join("")
+      : `<div class="sub" style="padding:6px 2px">아직 첫 지역을 지나는 중입니다.</div>`}
+  </section>`;
+
+  const locked = `<section class="card"><div class="sec"><img src="${ICON("prophecy")}" alt="">앞으로 열릴 지역</div>
+    <div class="flist">${later.map((r) => `<div class="frow"><span class="n num">${r.region}</span>
+      <span class="nm">${esc(r.name)}</span><span class="dt num">${r.from.slice(0, 7).replace("-", ".")}</span></div>`).join("")}</div>
+  </section>`;
+
+  $("world").innerHTML = `
+    <div class="apphead"><img src="${ICON("tab-world")}" alt="">
+      <div><h2>WORLD</h2><p>한 달에 한 지역씩</p></div></div>
+    ${cur}${next}${cps}${log}${later.length ? locked : ""}`;
+}
+const EXAM_TEXT = "2027-08-21 골밀도 재검사";
+
+/* 체크포인트 입력 */
+function openCheckpoint(date) {
+  const cp = compute(state, today).checkpoints.find((x) => x.date === date);
+  if (!cp) return;
+  const r = cp.record ?? {};
+  openOverlay(`
+    <div class="ov-h"><img src="${ICON("flag")}" alt=""><b>${cp.label} 기록</b></div>
+    <p class="sub">${cp.date.replaceAll("-", ".")} · ${cp.note}</p>
+    <div class="cpform">
+      ${METRICS.map((m) => `<label class="fld"><span>${m.label}${m.hint ? `<em>${m.hint}</em>` : ""}</span>
+        <input type="number" inputmode="decimal" step="0.1" id="cp-${m.id}" value="${r[m.id] ?? ""}" placeholder="—"><i>${m.unit}</i></label>`).join("")}
+      <label class="fld memo"><span>메모</span><textarea id="cp-memo" rows="2" placeholder="그날의 몸 상태, 검사 소견 등">${esc(r.memo ?? "")}</textarea></label>
+    </div>
+    <div class="ov-acts"><button class="btn" type="button" id="cpSave">저장</button>
+      ${cp.record ? `<button class="btn ghost" type="button" id="cpDel">지우기</button>` : ""}
+      <button class="btn ghost" type="button" data-close>닫기</button></div>`, { kind: "sheet" });
+
+  document.getElementById("cpSave").onclick = () => {
+    const rec = { date };
+    for (const m of METRICS) {
+      const v = document.getElementById(`cp-${m.id}`).value.trim();
+      rec[m.id] = v === "" || !Number.isFinite(+v) ? null : +v;
+    }
+    rec.memo = document.getElementById("cp-memo").value.trim();
+    const empty = METRICS.every((m) => rec[m.id] == null) && !rec.memo;
+    state.checkpoints = (state.checkpoints ?? []).filter((x) => x.date !== date);
+    if (!empty) state.checkpoints.push(rec);
+    state.checkpoints.sort((a, b) => a.date.localeCompare(b.date));
+    persist(); closeOverlay(); render();
+    if (empty) { sfx("uncheck"); toast({ title: "CHECKPOINT", text: "기록을 비웠습니다.", small: true }); }
+    else { sfx("clear"); toast({ title: "CHECKPOINT", text: `${cp.label} 기록을 저장했습니다.`, icon: ICON("flag") }); }
+  };
+  const del = document.getElementById("cpDel");
+  if (del) del.onclick = () => {
+    state.checkpoints = (state.checkpoints ?? []).filter((x) => x.date !== date);
+    persist(); closeOverlay(); render(); sfx("uncheck");
+    toast({ title: "CHECKPOINT", text: "기록을 지웠습니다.", small: true });
+  };
 }
 
 /* ---------- 퀘스트 상세 ---------- */
@@ -298,10 +405,8 @@ function renderLog(c) {
         <img src="${ICON(h.kind === "down" ? "rest" : "camp")}" alt=""></span>`).join("") || `<span></span><span class="sub">아직 변화가 없습니다</span><span></span>`}</div>
     </section>
 
-    <section class="card"><div class="sec"><img src="${ICON("flag")}" alt="">체크포인트</div>
-      <div class="cps">${c.checkpoints.map((cp, i) => `<div class="${i === c.checkpoints.length - 1 ? "fin" : ""}">
-        <span class="k">${cp.label}</span><span class="dt num">${cp.date.replaceAll("-", ".")}</span>
-        <span class="s">${cp.dday > 0 ? `D-${cp.dday}` : cp.note}</span></div>`).join("")}</div>
+    <section class="card"><div class="sec"><img src="${ICON("flag")}" alt="">체크포인트<span class="r">눌러서 기록</span></div>
+      <div class="cplist">${cpRows(c)}</div>
     </section>
 
     <section class="card"><div class="sec">MY STATUS<span class="r">완료 항목 수</span></div>
@@ -323,12 +428,16 @@ function render() {
   today = todayISO();
   const c = compute(state, today);
   window.__bq = { state, c };                       // 디버그용
+  const worldOpen = c.worldUnlock.unlocked;
+  if (!worldOpen && tab === "world") tab = "home";
+  document.documentElement.dataset.world = worldOpen ? "on" : "off";
   renderHome(c);
+  if (worldOpen) renderWorld(c);
   renderBoss(c);
   renderLog(c);
   if (detailKind) renderDetail(c, detailKind);
 
-  for (const id of ["home", "boss", "log", "detail"]) $(id).hidden = detailKind ? id !== "detail" : id !== tab;
+  for (const id of ["home", "world", "boss", "log", "detail"]) $(id).hidden = detailKind ? id !== "detail" : id !== tab;
   for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-current", String(b.dataset.tab === tab));
   document.documentElement.dataset.screen = detailKind ? "detail" : tab;
 }
@@ -344,6 +453,7 @@ function act(mutate) {
   render();
   const after = compute(state, today);
   feedback(before, after, wasRecognized);
+  maybeUnlockWorld(after);
 }
 
 function feedback(before, after, wasRecognized) {
@@ -374,6 +484,16 @@ function feedback(before, after, wasRecognized) {
   } else if (diff > 0) { sfx("check"); toast({ title: `+${diff} EXP`, small: true }); }
   else if (diff < 0) { sfx("uncheck"); toast({ title: `${diff} EXP`, small: true }); }
   else sfx("check");
+}
+
+/* WORLD 해금: 조건을 채운 순간 한 번만 */
+function maybeUnlockWorld(c) {
+  if (!c.worldUnlock.justNow) return;
+  state.flags.worldUnlockedOn = today;
+  persist();
+  render();
+  sfx("level");
+  toast({ title: "NEW AREA UNLOCKED", text: "WORLD 지도가 열렸습니다.", sub: `지역 ${c.world.region} · ${c.world.name}`, icon: ICON("tab-world") });
 }
 
 /* ---------- 입력 ---------- */
@@ -416,6 +536,9 @@ document.addEventListener("click", (e) => {
     if (next <= today.slice(0, 7) && next >= START.slice(0, 7)) { calMonth = next; render(); }
     return;
   }
+  const cpDate = e.target.closest("[data-cp]")?.dataset.cp;
+  if (cpDate) { sfx("tab"); openCheckpoint(cpDate); return; }
+
   if (e.target.closest("#todayBtn")) { calMonth = today.slice(0, 7); render(); return; }
   if (e.target.closest("#exportBtn")) { exportBackup(); return; }
   if (e.target.closest("#importBtn")) { pickBackup(); return; }
@@ -588,6 +711,7 @@ render();
     toast({ title: "CAMPFIRE RESTS", text: "잠시 불꽃이 약해졌습니다.", sub: `Lv. ${last} → Lv. ${c.camp}`, icon: ICON("rest") });
   state.flags.lastCamp = c.camp;
   persist();
+  maybeUnlockWorld(c);
   if (!state.flags.prologueSeen) openPrologue(() => maybeWeeklyBackupPrompt());
   else maybeWeeklyBackupPrompt();
   if (state.settings.bgm) window.addEventListener("pointerdown", () => bgmStart(), { once: true });   // 브라우저 정책상 첫 터치 후 재생

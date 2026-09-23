@@ -3,7 +3,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { migrateV1, normalize, exportJSON, parseBackup, load, save, KEY_V1, KEY_V2, SCHEMA_VERSION } from "../js/storage.js";
-import { compute, isRecognized, halfCount, damageOf, worldProgress, expOfItem } from "../js/rules.js";
+import { compute, isRecognized, halfCount, damageOf, worldProgress, regionProgress, regionIndex, worldUnlock, expOfItem } from "../js/rules.js";
+import { REGIONS, WORLD, WORLD_UNLOCK, METRICS, ROUTINE, RUNDAY_ID } from "../js/data.js";
 
 const TODAY = "2026-09-18";
 const v1 = JSON.parse(readFileSync(new URL("../fixtures/v1-2026-09-18.json", import.meta.url), "utf8"));
@@ -73,7 +74,7 @@ check("변환 후에도 v1 키 보존 (되돌릴 수 있게)", () => assert.ok(f
 check("체크포인트 기록 저장 구조", () => {
   const s = normalize({ log: {}, checkpoints: [{ date: "2026-12-02", muscleMass: 18.4, weight: 52.1, memo: "3개월" }] });
   save(s, fake);
-  assert.deepEqual(load(fake, TODAY).state.checkpoints[0], { date: "2026-12-02", muscleMass: 18.4, weight: 52.1, memo: "3개월" });
+  assert.deepEqual(load(fake, TODAY).state.checkpoints[0], { date: "2026-12-02", muscleMass: 18.4, bodyFat: null, weight: 52.1, bmd: null, memo: "3개월" });
 });
 
 /* ---- 4단계: 미리보기 이후 v1에서 계속 체크한 기록 합치기 ---- */
@@ -92,6 +93,79 @@ check("체크포인트 기록 저장 구조", () => {
   check("v1이 그대로면 다시 합치지 않음", () => assert.equal(load(m, TODAY).merged, 0));
   const s3 = load(m, TODAY).state; s3.log["2026-09-21"] = []; delete s3.log["2026-09-21"]; save(s3, m);
   check("2.0에서 지운 체크는 v1이 바뀌지 않는 한 되살아나지 않음", () => assert.equal(load(m, TODAY).state.log["2026-09-21"], undefined));
+}
+
+/* ---- Phase 2: WORLD · 체크포인트 ---- */
+{
+  const w = worldProgress(state, TODAY);
+  check("지역 12개 · 이름 있음", () => { assert.equal(w.list.length, WORLD.regions); assert.equal(REGIONS.length, 12); assert.ok(w.name.length > 1); });
+  check("현재 1지역 (9/2~10/1)", () => { assert.equal(w.region, 1); assert.equal(w.from, "2026-09-02"); assert.equal(w.to, "2026-10-01"); });
+  check("진행률은 인정일로만 (13/12 → 100%, ★3)", () => { assert.equal(w.recognized, 13); assert.equal(w.percent, 100); assert.equal(w.stars, 3); });
+  check("같은 지역인데 하루 지나도 진행률 그대로", () => assert.equal(regionProgress(state, 0, "2026-09-25").percent, w.percent));
+  check("지역은 한 달마다 열림", () => { assert.equal(regionIndex("2026-10-01"), 0); assert.equal(regionIndex("2026-10-02"), 1); assert.equal(regionIndex("2027-08-21"), 11); });
+  check("다음 지역 안내", () => { assert.equal(w.next.region, 2); assert.equal(w.next.from, "2026-10-02"); assert.equal(w.next.state, "future"); });
+  check("12지역이 마지막 (그 뒤 날짜도 12지역)", () => { assert.equal(regionIndex("2028-01-01"), 11); assert.equal(worldProgress(state, "2027-09-30").next, null); });
+  const later = regionProgress(state, 1, TODAY);
+  check("아직 안 열린 지역은 0%", () => { assert.equal(later.recognized, 0); assert.equal(later.stars, 0); });
+  check("별: 40%(5일)·70%(9일)·100%(12일) 기준", () => {
+    const only = (n) => {
+      const st = normalize({ log: {} });
+      let filled = 0;
+      for (let d = 2; d <= 30 && filled < n; d++) {
+        const date = `2026-09-${String(d).padStart(2, "0")}`;
+        const wd = new Date(2026, 8, d).getDay();
+        const items = ROUTINE[wd].items.map((i) => i.id);                 // 그 요일 메인 전부 = 인정일
+        st.log[date] = wd === 2 || wd === 6 ? [RUNDAY_ID] : items;        // 화·토는 러닝(Runday)
+        filled++;
+      }
+      return regionProgress(st, 0, "2026-09-30").stars;
+    };
+    assert.equal(only(4), 0); assert.equal(only(5), 1); assert.equal(only(9), 2); assert.equal(only(12), 3);
+  });
+
+  const cp = normalize({ log: {}, checkpoints: [{ date: "2026-12-02", muscleMass: 18.4, bodyFat: 31.2, weight: 52.1, bmd: -1.6, memo: "3개월" }] });
+  check("체크포인트 4개 항목 저장", () => { const r = cp.checkpoints[0]; assert.equal(r.muscleMass, 18.4); assert.equal(r.bodyFat, 31.2); assert.equal(r.bmd, -1.6); });
+  check("체크포인트가 compute에 붙음", () => { const r = compute(cp, TODAY).checkpoints.find((x) => x.date === "2026-12-02"); assert.equal(r.record.bmd, -1.6); assert.equal(r.label, "3개월"); });
+  check("빈 값은 null로 (0과 구분)", () => { const r = normalize({ log: {}, checkpoints: [{ date: "2026-12-02", muscleMass: "", weight: 0 }] }).checkpoints[0]; assert.equal(r.muscleMass, null); assert.equal(r.weight, 0); });
+  check("체크포인트도 백업에 실림", () => { const back = parseBackup(exportJSON(cp, TODAY)); assert.equal(back.state.checkpoints[0].bmd, -1.6); });
+  check("입력 항목 4종", () => assert.deepEqual(METRICS.map((m) => m.id), ["muscleMass", "bodyFat", "weight", "bmd"]));
+}
+
+/* ---- Phase 2: WORLD 해금 조건 ---- */
+{
+  const mkWeeks = (weeks, perWeek) => {                    // 2026-09-14(월)부터 주마다 perWeek일씩 인정
+    const st = normalize({ log: {} });
+    st.flags.eventsFrom = "2026-09-18";
+    for (let w = 0; w < weeks; w++) for (let i = 0; i < perWeek; i++) {
+      const d = new Date(2026, 8, 14 + w * 7 + i);
+      const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      st.log[date] = d.getDay() === 2 || d.getDay() === 6 ? [RUNDAY_ID] : ROUTINE[d.getDay()].items.map((x) => x.id);
+    }
+    return st;
+  };
+  const last = (weeks) => { const d = new Date(2026, 8, 14 + (weeks - 1) * 7 + 6); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+  check("2.0 쓴 지 2주면 아직 안 열림", () => assert.equal(worldUnlock(mkWeeks(2, 5), last(2)).unlocked, false));
+  check("4주 됐어도 인정 3일 주가 2주면 안 열림", () => {
+    const st = mkWeeks(4, 3); for (const d of Object.keys(st.log)) if (d >= "2026-09-28") delete st.log[d];
+    const u = worldUnlock(st, last(4));
+    assert.equal(u.weeksUsed, 4); assert.equal(u.campWeeks, 2); assert.equal(u.unlocked, false);
+  });
+  check("4주 + 인정 3일 주 3주면 열림", () => {
+    const u = worldUnlock(mkWeeks(4, 3), last(4));
+    assert.equal(u.campWeeks >= WORLD_UNLOCK.campWeeks, true); assert.equal(u.unlocked, true); assert.equal(u.justNow, true);
+  });
+  check("한 번 열리면 기록이 줄어도 닫히지 않음", () => {
+    const st = mkWeeks(2, 1); st.flags.worldUnlockedOn = "2026-10-12";
+    const u = worldUnlock(st, last(2));
+    assert.equal(u.unlocked, true); assert.equal(u.justNow, false); assert.equal(u.since, "2026-10-12");
+  });
+  check("해금 여부가 compute에 붙음", () => assert.equal(typeof compute(state, TODAY).worldUnlock.unlocked, "boolean"));
+  check("지금 기록(9/18)으로는 아직 잠김", () => assert.equal(compute(state, TODAY).worldUnlock.unlocked, false));
+  check("해금 날짜는 백업에 실림", () => {
+    const st = normalize({ log: {}, flags: { worldUnlockedOn: "2026-10-12" } });
+    assert.equal(parseBackup(exportJSON(st, TODAY)).state.flags.worldUnlockedOn, "2026-10-12");
+  });
 }
 
 /* ---- 결과 ---- */

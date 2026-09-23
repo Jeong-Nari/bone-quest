@@ -4,7 +4,7 @@
 import {
   START, LAUNCH_WEEK, TYPE, DMG, BOSS_HP, EXP, levelNeed, CAMP,
   TWO_MIN_PER_WEEK, REST_PER_WEEK, RUNDAY_ID, LEGACY_MAIN_COUNT,
-  ROUTINE, FUEL, ITEM_INDEX, FLEX_IDS, EVENTS, WORLD, CHECKPOINTS,
+  ROUTINE, FUEL, ITEM_INDEX, FLEX_IDS, EVENTS, WORLD, WORLD_UNLOCK, REGIONS, CHECKPOINTS,
 } from "./data.js";
 
 /* ---------- 날짜 ---------- */
@@ -198,26 +198,88 @@ export function compute(state, today = todayISO()) {
     restWeek, restLeft: Math.max(0, REST_PER_WEEK - restWeek),
     month, protein, monthDays,
     event: eventsActiveOn(state, today) ? eventOf(today) : null,
-    checkpoints: CHECKPOINTS.map((c) => ({ ...c, dday: daysBetween(today, c.date) })),
+    checkpoints: CHECKPOINTS.map((c) => ({
+      ...c,
+      dday: daysBetween(today, c.date),
+      record: (state.checkpoints ?? []).find((r) => r.date === c.date) ?? null,
+    })),
     world: worldProgress(state, today),
+    worldUnlock: worldUnlock(state, today),
+  };
+}
+
+/* ---------- WORLD 해금 ---------- */
+/** 2.0을 쓰기 시작한 주부터 몇 주가 지났는지, 그중 인정일 3일 이상인 주가 몇 주인지.
+ *  한 번 열리면 flags.worldUnlockedOn에 남아 다시 닫히지 않는다. */
+export function worldUnlock(state, today = todayISO()) {
+  const startWeek = mondayOf(state.flags?.eventsFrom ?? LAUNCH_WEEK);
+  const curWeek = mondayOf(today);
+  let weeksUsed = 0;
+  for (let m = startWeek; m <= curWeek; m = addDays(m, 7)) weeksUsed++;
+
+  let campWeeks = 0;
+  for (let m = startWeek; m <= curWeek; m = addDays(m, 7)) {
+    let days = 0;
+    for (let i = 0; i < 7; i++) { const d = addDays(m, i); if (d <= today && isRecognized(state, d)) days++; }
+    if (days >= WORLD_UNLOCK.recognizedPerWeek) campWeeks++;
+  }
+  const already = state.flags?.worldUnlockedOn ?? null;
+  const met = weeksUsed >= WORLD_UNLOCK.weeksUsed && campWeeks >= WORLD_UNLOCK.campWeeks;
+  return {
+    unlocked: !!already || met,
+    justNow: !already && met,
+    since: already,
+    weeksUsed, weeksNeed: WORLD_UNLOCK.weeksUsed,
+    campWeeks, campNeed: WORLD_UNLOCK.campWeeks,
   };
 }
 
 /* ---------- WORLD (Phase 2) ---------- */
-export function worldProgress(state, today = todayISO()) {
+/** 지역 n(0부터)의 기간. START에서 n달 뒤 같은 날 ~ 그 다음 달 전날 */
+function regionRange(n) {
   const start = parseDate(START);
-  const cur = parseDate(today);
-  let index = (cur.getFullYear() - start.getFullYear()) * 12 + (cur.getMonth() - start.getMonth());
-  if (cur.getDate() < start.getDate()) index--;
-  index = Math.max(0, Math.min(WORLD.regions - 1, index));
-  const from = toISO(new Date(start.getFullYear(), start.getMonth() + index, start.getDate()));
-  const to = addDays(toISO(new Date(start.getFullYear(), start.getMonth() + index + 1, start.getDate())), -1);
+  const from = toISO(new Date(start.getFullYear(), start.getMonth() + n, start.getDate()));
+  const to = addDays(toISO(new Date(start.getFullYear(), start.getMonth() + n + 1, start.getDate())), -1);
+  return { from, to };
+}
 
+/** 오늘이 속한 지역 번호(0부터). START 이전이면 0, 12지역을 넘어가면 마지막 지역 */
+export function regionIndex(today = todayISO()) {
+  const start = parseDate(START), cur = parseDate(today);
+  let i = (cur.getFullYear() - start.getFullYear()) * 12 + (cur.getMonth() - start.getMonth());
+  if (cur.getDate() < start.getDate()) i--;
+  return Math.max(0, Math.min(WORLD.regions - 1, i));
+}
+
+const starsOf = (percent) => (percent >= 100 ? 3 : percent >= 70 ? 2 : percent >= 40 ? 1 : 0);
+
+/** 지역 하나의 진행도. 진행률은 시간이 아니라 그 달의 인정일로만 오른다 */
+export function regionProgress(state, n, today = todayISO()) {
+  const { from, to } = regionRange(n);
   let recognized = 0, bosses = 0;
   for (let d = from; d <= to && d <= today; d = addDays(d, 1)) if (isRecognized(state, d)) recognized++;
   for (const w of allWeeks(state, today)) if (w.killed && w.monday >= from && w.monday <= to) bosses++;
-
   const percent = Math.min(100, Math.round((recognized / WORLD.recognizedPerRegion) * 100));
-  return { region: index + 1, from, to, recognized, need: WORLD.recognizedPerRegion, bosses, bossNeed: WORLD.bossPerRegion, percent,
-           stars: percent >= 100 ? 3 : percent >= 70 ? 2 : percent >= 40 ? 1 : 0 };
+  const cur = regionIndex(today);
+  return {
+    n, region: n + 1, name: REGIONS[n]?.name ?? `${n + 1}지역`, desc: REGIONS[n]?.desc ?? "",
+    from, to, recognized, need: WORLD.recognizedPerRegion, bosses, bossNeed: WORLD.bossPerRegion,
+    percent, stars: starsOf(percent),
+    state: n < cur ? "past" : n === cur ? "current" : "future",
+    daysLeft: n === cur ? Math.max(0, daysBetween(today, to)) : null,
+  };
+}
+
+/** 현재 지역 + 12개 전체 + 다음 지역 */
+export function worldProgress(state, today = todayISO()) {
+  const cur = regionIndex(today);
+  const list = Array.from({ length: WORLD.regions }, (_, i) => regionProgress(state, i, today));
+  const done = list.filter((r) => r.state === "past");
+  return {
+    ...list[cur],
+    list,
+    next: list[cur + 1] ?? null,
+    clearedRegions: done.filter((r) => r.stars > 0).length,
+    totalStars: done.reduce((a, r) => a + r.stars, 0) + list[cur].stars,
+  };
 }

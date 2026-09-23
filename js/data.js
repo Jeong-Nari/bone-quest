@@ -6,8 +6,8 @@ export const LAUNCH_WEEK = "2026-09-14";    // 2.0 규칙 적용 주(월요일).
 export const EXAM = "2027-08-21";           // 골밀도 재검사 = 최종 보스전
 
 export const CHECKPOINTS = [
-  { key: "start", label: "시작",   date: START,        note: "출발 기록" },
-  { key: "m3",    label: "3개월",  date: "2026-12-02", note: "근육량·체중·메모" },
+  { key: "start", label: "시작",   date: START,        note: "출발 기록 (검진 결과)" },
+  { key: "m3",    label: "3개월",  date: "2026-12-02", note: "인바디 측정" },
   { key: "m6",    label: "6개월",  date: "2027-03-02", note: "인바디 측정" },
   { key: "m12",   label: "12개월", date: EXAM,         note: "골밀도 재검사" },
 ];
@@ -114,8 +114,34 @@ export const EVENTS = {
   FUEL:    { name: "BONE FUEL DAY", desc: "오늘 처음 체크한 BONE FUEL 1개 EXP ×2" },
 };
 
-/* WORLD (Phase 2) */
+/* WORLD 해금 조건: 2.0을 쓰기 시작한 뒤 4주 이상 + 그중 인정일 3일 이상인 주가 3주 */
+export const WORLD_UNLOCK = { weeksUsed: 4, campWeeks: 3, recognizedPerWeek: 3 };
+
+/* WORLD (Phase 2) — 지역은 START(2026-09-02)부터 한 달에 하나씩 열린다 */
 export const WORLD = { daysPerRegion: 1, recognizedPerRegion: 12, bossPerRegion: 4, regions: 12 };
+
+export const REGIONS = [
+  { name: "첫걸음의 들판",   desc: "2년을 쉰 몸이 처음 다시 움직이는 곳." },
+  { name: "무른 뼈의 숲",     desc: "발뒤꿈치가 땅을 두드릴 때마다 뼈가 깨어난다." },
+  { name: "바람 부는 언덕",   desc: "숨이 차오르는 오르막. 버티는 법을 배운다." },
+  { name: "서리 내린 골짜기", desc: "첫 점검의 땅. 지나온 석 달이 몸에 남았는지 확인한다." },
+  { name: "얼어붙은 호수",   desc: "가장 나가기 싫은 달. 2분이라도 움직인 날이 길을 만든다." },
+  { name: "눈 그친 산길",     desc: "굳은 관절을 녹이며 한 걸음씩. 유연함이 무기가 된다." },
+  { name: "해빙의 강가",     desc: "두 번째 점검의 땅. 근육이 붙기 시작한 자리." },
+  { name: "새싹 덮인 폐허",   desc: "무너진 자세를 다시 세우는 곳. 어깨가 열린다." },
+  { name: "비 내리는 돌다리", desc: "미끄러운 다리 위. 중심을 잡는 힘을 시험한다." },
+  { name: "한낮의 채석장",   desc: "더 무거운 것을 드는 달. 돌을 깨듯 부하를 올린다." },
+  { name: "뜨거운 사막 관문", desc: "마지막 관문. 여기를 넘으면 성이 보인다." },
+  { name: "골왕의 성",       desc: "봉인이 풀린다. 1년간 벼려온 뼈와 근육으로 맞선다." },
+];
+
+/* 체크포인트에 기록하는 값 */
+export const METRICS = [
+  { id: "muscleMass", label: "근육량",   short: "근육",   unit: "kg", hint: "인바디 골격근량" },
+  { id: "bodyFat",    label: "체지방률", short: "체지방", unit: "%",  hint: "" },
+  { id: "weight",     label: "체중",     short: "체중",   unit: "kg", hint: "" },
+  { id: "bmd",        label: "골밀도",   short: "골밀도", unit: "T",  hint: "T-score (예: -2.0)" },
+];
 
 export const ITEM_INDEX = (() => {
   const map = new Map();

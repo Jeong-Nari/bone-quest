@@ -14,12 +14,13 @@ export function emptyState() {
     two: {},          // { "2026-09-18": true }  2분 퀘스트
     checkpoints: [],  // [{ date, muscleMass, weight, memo }]
     settings: { sfx: true, bgm: false, track: 0 },
-    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null, lastCamp: null, v1Sync: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
+    flags: { prologueSeen: false, backupPromptWeek: null, eventsFrom: null, lastCamp: null, v1Sync: null, worldUnlockedOn: null },  // backupPromptWeek: 백업 알림을 닫은 주, eventsFrom: 이벤트 적용 시작일(2.0 첫 실행일)
     savedAt: null,
   };
 }
 
 const isPlainObject = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+const num = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(+v) ? null : +v);
 const isDate = (s) => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 /** 어떤 형태(v1/v2/부분 손상)든 온전한 v2 상태로 만든다 */
@@ -45,8 +46,10 @@ export function normalize(raw) {
         .filter((c) => isPlainObject(c) && isDate(c.date))
         .map((c) => ({
           date: c.date,
-          muscleMass: Number.isFinite(+c.muscleMass) ? +c.muscleMass : null,
-          weight: Number.isFinite(+c.weight) ? +c.weight : null,
+          muscleMass: num(c.muscleMass),
+          bodyFat: num(c.bodyFat),
+          weight: num(c.weight),
+          bmd: num(c.bmd),          // 골밀도 T-score (음수)
           memo: typeof c.memo === "string" ? c.memo : "",
         }))
     : [];
@@ -68,6 +71,7 @@ export function normalize(raw) {
       eventsFrom: isDate(raw.flags?.eventsFrom) ? raw.flags.eventsFrom : null,
       lastCamp: Number.isInteger(raw.flags?.lastCamp) ? raw.flags.lastCamp : null,   // 마지막으로 본 CAMP 레벨 (하락 알림용)
       v1Sync: typeof raw.flags?.v1Sync === "string" ? raw.flags.v1Sync : null,       // 마지막으로 합친 v1 기록의 지문
+      worldUnlockedOn: isDate(raw.flags?.worldUnlockedOn) ? raw.flags.worldUnlockedOn : null,   // WORLD 탭이 열린 날
     },
     savedAt: typeof raw.savedAt === "string" ? raw.savedAt : (typeof raw.saved === "string" ? raw.saved : null),
   };
