@@ -364,3 +364,27 @@ html[data-world="on"] .tabs [data-tab="world"]{display:flex}
 .fld i{font-style:normal;font-size:12px;color:var(--ink2)}
 .fld.memo{grid-template-columns:96px 1fr;align-items:start}
 .fld.memo>span{padding-top:8px}
+
+
+/* ---------- 하루 보기 ---------- */
+.cal .d[data-day]{cursor:pointer}
+.dayhead{display:flex;gap:6px;margin:8px 0 4px}
+.tag{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border:2px solid var(--dark);background:var(--bone);color:var(--dark)}
+.tag.ok{background:var(--moss);color:var(--paper);border-color:var(--moss)}
+.tag.blue{background:var(--blue);color:var(--paper);border-color:var(--blue)}
+.tag.idle{background:transparent;border-color:var(--ember);color:#9A4A20}
+.tag.today{background:var(--dark);color:var(--paper)}
+.daylist{display:flex;flex-direction:column;gap:2px;margin:6px 0 10px;max-height:44vh;overflow:auto}
+.dayrow{display:grid;grid-template-columns:22px 1fr;align-items:start;gap:9px;padding:7px 2px;border-top:1px solid rgba(39,38,34,.12);font-size:13px}
+.dayrow:first-child{border-top:0}
+.dayrow .cb{width:20px;height:20px;border:2px solid var(--dark);display:grid;place-items:center;background:var(--paper)}
+.dayrow.on .cb{background:var(--moss);border-color:var(--moss)}
+.dayrow .cb svg{width:13px;height:13px;fill:none;stroke:var(--paper);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.dayrow .nm{display:flex;flex-direction:column;gap:1px;font-weight:700}
+.dayrow .nm em{font-style:normal;font-size:11.5px;font-weight:400;color:var(--ink2)}
+.dayrow.on .nm{color:var(--moss-2)}
+.daysum{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink2);border-top:1px dashed rgba(39,38,34,.25);padding-top:9px}
+.daysum b{color:var(--dark)}
+.daychips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.daychips span{display:flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 8px;background:var(--bone);border:1px solid var(--line)}
+.daychips img{width:16px;height:16px}

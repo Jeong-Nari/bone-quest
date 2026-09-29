@@ -3,7 +3,7 @@
    - 설치 시 앱 파일 전체를 저장해 두어, 인터넷이 없어도 열린다.
    - 화면·코드(html/js/css/manifest)는 인터넷이 되면 새 것을 받고, 안 되면 저장본을 쓴다.
    - 이미지·폰트는 저장본을 바로 쓴다 (바뀌면 VERSION이 바뀌어 새로 받는다). */
-const VERSION = "7dbf336179";
+const VERSION = "3d58785a06";
 const CACHE = `bonequest-v2-${VERSION}`;
 const FILES = [
   "./",

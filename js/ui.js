@@ -7,7 +7,7 @@ import {
 } from "./data.js";
 import {
   compute, todayISO, dow, addDays, mondayOf, sessionType, isRecognized, isSide,
-  mainsOf, mainCount, halfCount, logOf, expOfItem, eventOf, eventsActiveOn, isDayCleared, parseDate, toISO,
+  mainsOf, mainCount, halfCount, logOf, damageOf, expOfItem, eventOf, eventsActiveOn, isDayCleared, parseDate, toISO,
 } from "./rules.js";
 import { load, save, exportJSON, backupFileName, parseBackup } from "./storage.js";
 import { toast, openOverlay, closeOverlay, sfx, bgmStart, bgmStop, setSoundSettings, TRACKS } from "./fx.js";
@@ -192,6 +192,58 @@ function renderWorld(c) {
 }
 const EXAM_TEXT = "2027-08-21 골밀도 재검사";
 
+/* 하루 보기: 그날의 루틴과 기록 (보기 전용) */
+function openDay(date) {
+  const w = dow(date);
+  const routine = ROUTINE[w];
+  const type = sessionType(date);
+  const log = logOf(state, date);
+  const mains = mainsOf(state, date);
+  const known = new Set(routine.items.map((i) => i.id));
+  const legacy = mains.filter((id) => !known.has(id)).length;      // 구버전 키(m3-0 등)로 남은 기록
+  const resting = !!state.rest[date];
+  const twoDone = !!state.two[date];
+  const ok = isRecognized(state, date);
+  const future = date > today;
+  const need = halfCount(state, date);
+  const dmg = damageOf(state, date);
+
+  const badge = future ? `<span class="tag">예정</span>`
+    : resting ? `<span class="tag blue">REST DAY</span>`
+    : ok ? `<span class="tag ok">세션 인정</span>`
+    : twoDone ? `<span class="tag">2분 퀘스트</span>`
+    : mains.length ? `<span class="tag">기록 있음 · 인정 안 됨</span>`
+    : `<span class="tag idle">무행동</span>`;
+
+  const rows = routine.items.map((it) => {
+    const on = log.includes(it.id);
+    return `<div class="dayrow${on ? " on" : ""}"><span class="cb">${on ? CHECK : ""}</span>
+      <span class="nm">${esc(it.name)}<em>${esc(it.desc ?? "")}</em></span></div>`;
+  }).join("");
+
+  const fuel = FUEL.filter((f) => log.includes(f.id));
+  const foot = future
+    ? `<p class="sub">아직 오지 않은 날입니다. 체크는 그날 할 수 있어요.</p>`
+    : `<div class="daysum">
+        <span>메인 <b class="num">${mains.length}${legacy ? ` (+구버전 ${legacy})` : ""} / ${routine.items.length}</b></span>
+        <span>인정 기준 <b class="num">${type === "RUN" ? "Runday 완료" : `${need}개`}</b></span>
+        <span>관성 <b class="num">${dmg ? `−${dmg} DMG` : "0 DMG"}</b></span>
+      </div>
+      ${fuel.length ? `<div class="daychips">${fuel.map((f) => `<span><img src="${ICON(f.icon)}" alt="">${esc(f.name)}</span>`).join("")}</div>` : ""}`;
+
+  openOverlay(`
+    <div class="ov-h"><img src="${ICON(TYPE_ICON[type])}" alt=""><b>${md(date)} (${DAY[w]}) · ${TYPE_NAME[type]}</b></div>
+    <p class="sub">${esc(routine.kind)} — ${esc(routine.why)}</p>
+    <div class="dayhead">${badge}${date === today ? `<span class="tag today">오늘</span>` : ""}</div>
+    <div class="daylist">${rows}</div>
+    ${foot}
+    <div class="ov-acts">${date === today ? `<button class="btn" type="button" id="dayGo">오늘 퀘스트 열기</button>` : ""}
+      <button class="btn ghost" type="button" data-close>닫기</button></div>`, { kind: "sheet" });
+
+  const go2 = document.getElementById("dayGo");
+  if (go2) go2.onclick = () => { closeOverlay(); tab = "home"; detailKind = "detail"; window.scrollTo({ top: 0 }); render(); sfx("tab"); };
+}
+
 /* 체크포인트 입력 */
 function openCheckpoint(date) {
   const cp = compute(state, today).checkpoints.find((x) => x.date === date);
@@ -351,7 +403,7 @@ function renderLog(c) {
     else if (date === today) cls = "today";
     else cls = "idle";
     if (date === today && cls !== "today") cls += " today";
-    cells.push(`<div class="d ${cls}"><span>${k}</span></div>`);
+    cells.push(`<div class="d ${cls}" data-day="${date}" role="button" tabindex="0"><span>${k}</span></div>`);
   }
 
   const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -378,6 +430,7 @@ function renderLog(c) {
         <span><i style="background:var(--bone);box-shadow:inset 0 0 0 2px var(--moss)"></i>리커버리</span>
         <span><i style="background:var(--blue)"></i>REST</span>
         <span><i style="box-shadow:inset 0 0 0 2px var(--ember)"></i>무행동</span></div>
+      <div class="rulenote">※ 날짜를 누르면 그날의 루틴과 기록을 볼 수 있습니다.</div>
     </section>
 
     <section class="card"><div class="sec"><img src="${ICON("quest")}" alt="">${+today.slice(5, 7)}월 활동 요약<span class="r">인정 / 예정일</span></div>
@@ -536,6 +589,9 @@ document.addEventListener("click", (e) => {
     if (next <= today.slice(0, 7) && next >= START.slice(0, 7)) { calMonth = next; render(); }
     return;
   }
+  const dayCell = e.target.closest("[data-day]")?.dataset.day;
+  if (dayCell) { sfx("tab"); openDay(dayCell); return; }
+
   const cpDate = e.target.closest("[data-cp]")?.dataset.cp;
   if (cpDate) { sfx("tab"); openCheckpoint(cpDate); return; }
 
