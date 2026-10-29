@@ -58,7 +58,7 @@ export const ROUTINE = {
   1: { kind: "하체 기둥", why: "대퇴골 공략", items: [
     { id: "cat-cow",           name: "캣카우 + 힙 서클 2분",     stat: "flex", desc: "굳은 골반부터 풀고 시작" },
     { id: "chair-squat",       name: "템포 스쿼트 10회 × 3",     stat: "str",  desc: "내려가기 3초 · 무릎이 안쪽으로 모이지 않게" },
-    { id: "hip-bridge",        name: "한 발 힙 브릿지 8회씩 × 3",       stat: "str",  desc: "왼쪽 먼저 · 버거우면 양발 20회 × 3" },
+    { id: "hip-bridge",        name: "밴드 브릿지 레그컬 8회 × 3",     stat: "str",  desc: "밴드는 발 쪽 앞에 고정 · 다리 거의 편 채 엉덩이 들고 뒤꿈치 당기기 · 엉덩이 처지지 않게" },
     { id: "split-squat",       name: "스플릿 스쿼트 10회씩 × 3",  stat: "str",  desc: "왼쪽 먼저 · 왼쪽만 1세트 더. 불편하면 반만" },
     { id: "calf-raise",        name: "한 발 카프 레이즈 12회씩 × 2",     stat: "bone", desc: "천천히 올리고 뒤꿈치는 툭 떨어뜨리기" },
     { id: "hipflexor-stretch", name: "힙 플렉서 스트레칭 30초씩", stat: "flex", desc: "골반 앞쪽 단축 풀기" },
