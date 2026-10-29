@@ -3,7 +3,7 @@
 
 import {
   START, LAUNCH_WEEK, TYPE, DMG, BOSS_HP, EXP, levelNeed, CAMP,
-  TWO_MIN_PER_WEEK, REST_PER_WEEK, RUNDAY_ID, LEGACY_MAIN_COUNT,
+  TWO_MIN_PER_WEEK, REST_PER_WEEK, RUNDAY_ID, LEGACY_MAIN_COUNT, MAIN_COUNT_HISTORY,
   ROUTINE, FUEL, ITEM_INDEX, FLEX_IDS, EVENTS, WORLD, WORLD_UNLOCK, REGIONS, CHECKPOINTS,
 } from "./data.js";
 
@@ -27,6 +27,7 @@ const isLegacyDay = (state, date) => { const m = mainsOf(state, date); return m.
 export function mainCount(state, date) {
   const w = dow(date);
   if (isLegacyDay(state, date) && LEGACY_MAIN_COUNT[w] != null) return LEGACY_MAIN_COUNT[w];
+  for (const h of MAIN_COUNT_HISTORY) if (date <= h.until && h.counts[w] != null) return h.counts[w];
   return ROUTINE[w].items.length;
 }
 /** 세션 인정 기준 개수 (메인 동작 50% 이상) */

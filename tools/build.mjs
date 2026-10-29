@@ -7,8 +7,9 @@ import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from "n
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL("..", import.meta.url));   // 한글 경로에서도 안전하게
 const walk = (d) => readdirSync(join(ROOT, d)).flatMap((f) => {
   const p = join(d, f);
   return statSync(join(ROOT, p)).isDirectory() ? walk(p) : [p];

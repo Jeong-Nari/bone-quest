@@ -43,6 +43,12 @@ export const RUNDAY_ID = "runday";
 /* 구버전(m{요일}-{n}) 기록의 메인 퀘스트 개수 — 수·목이 5개였던 시기 */
 export const LEGACY_MAIN_COUNT = { 3: 5, 4: 5 };
 
+/* 루틴 항목 수가 바뀐 이력. 그 날짜까지의 기록은 예전 개수로 완주(+20 EXP)를 판정한다.
+   항목을 추가·삭제할 때마다 여기에 한 줄 추가할 것 — 안 그러면 과거 완주 보너스가 풀린다. */
+export const MAIN_COUNT_HISTORY = [
+  { until: "2026-10-28", counts: { 3: 6, 5: 5 } },   // 2026-10-29 코어 추가(수 플랭크, 금 코어 마무리) 전
+];
+
 export const ROUTINE = {
   0: { kind: "리커버리", why: "쉬는 것도 루틴", items: [
     { id: "foam-roll",    name: "폼롤러 마사지 3~5분",  stat: "flex", desc: "다리 → 등 순서. 왼쪽을 2배 오래" },
@@ -69,6 +75,7 @@ export const ROUTINE = {
     { id: "towel-pullapart",  name: "고무밴드 풀 어파트 15회 × 3", stat: "str", desc: "밴드를 짧게 잡아 저항 올리기" },
     { id: "incline-pushup",   name: "인클라인 푸시업 8~10회 × 3",  stat: "str",  desc: "지지대를 한 단계 낮추기. 팔꿈치는 45도" },
     { id: "superman",         name: "슈퍼맨 10회 × 3",           stat: "bone", desc: "끝에서 2초 정지. 허리를 굽히지 않고 펴기" },
+    { id: "plank",            name: "포어암 플랭크 20~30초 × 3",  stat: "str",  desc: "엉덩이가 들리거나 허리가 꺼지지 않게. 허리가 뻐근하면 중단" },
   ]},
   4: { kind: "모빌리티 & 정렬", why: "골반·무릎 + 코어", items: [
     { id: "hip-9090",       name: "90/90 힙 스트레칭 1분씩",        stat: "flex", desc: "왼쪽부터 · 왼쪽은 2배 오래" },
@@ -76,7 +83,7 @@ export const ROUTINE = {
     { id: "clamshell",      name: "클램쉘 + 고무밴드 15회씩 × 3",   stat: "str",  desc: "끝에서 2초 정지 · 왼쪽만 1세트 더. 고관절 앞이 아프면 밴드 빼기" },
     { id: "side-abduction", name: "사이드라잉 힙 어브덕션 15회씩 × 3", stat: "str", desc: "끝에서 2초 정지 · 골반이 뒤로 눕지 않게" },
     { id: "calf-ankle",     name: "종아리·발목 스트레칭 1분씩",     stat: "flex", desc: "왼쪽은 2배 오래" },
-    { id: "deadbug",        name: "데드버그 10회씩 × 2",            stat: "str",  desc: "허리를 바닥에 붙인 채로" },
+    { id: "deadbug",        name: "데드버그 10회씩 × 3",            stat: "str",  desc: "허리를 바닥에 붙인 채로" },
   ]},
   5: { kind: "임팩트 데이", why: "뼈에 직접 신호", items: [
     { id: "heel-drop",  name: "힐 드롭 10회 × 3",                  stat: "bone", desc: "발끝으로 섰다가 뒤꿈치 쿵" },
@@ -84,6 +91,7 @@ export const ROUTINE = {
     { id: "mini-hop",   name: "제자리 통통 뛰기 15회 × 3",         stat: "bone", desc: "2~3cm만 낮게. 무릎 불편하면 힐 드롭으로 대체" },
     { id: "rdl-bag",    name: "루마니안 데드리프트 10회 × 3",      stat: "str",  desc: "가방에 2~3kg 더. 엉덩이를 뒤로 빼며 등은 곧게" },
     { id: "wall-sit",   name: "월 시트 40초 × 3",               stat: "str",  desc: "무릎은 90도까지만" },
+    { id: "core-finish", name: "코어 마무리 2분",                 stat: "str",  desc: "포어암 플랭크 20~30초 + 사이드 플랭크 15초씩. 왼쪽부터 · 무릎 굽혀도 됨" },
   ]},
 };
 ROUTINE[6] = { kind: "러닝 데이", why: "런데이 앱", items: ROUTINE[2].items };

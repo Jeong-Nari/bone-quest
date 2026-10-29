@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { migrateV1, normalize, exportJSON, parseBackup, load, save, KEY_V1, KEY_V2, SCHEMA_VERSION } from "../js/storage.js";
-import { compute, isRecognized, halfCount, damageOf, worldProgress, regionProgress, regionIndex, worldUnlock, expOfItem } from "../js/rules.js";
+import { compute, isRecognized, halfCount, mainCount, isDayCleared, damageOf, worldProgress, regionProgress, regionIndex, worldUnlock, expOfItem } from "../js/rules.js";
 import { REGIONS, WORLD, WORLD_UNLOCK, METRICS, ROUTINE, RUNDAY_ID } from "../js/data.js";
 
 const TODAY = "2026-09-18";
@@ -165,6 +165,19 @@ check("체크포인트 기록 저장 구조", () => {
   check("해금 날짜는 백업에 실림", () => {
     const st = normalize({ log: {}, flags: { worldUnlockedOn: "2026-10-12" } });
     assert.equal(parseBackup(exportJSON(st, TODAY)).state.flags.worldUnlockedOn, "2026-10-12");
+  });
+}
+
+/* ---- 루틴 항목이 늘어도 과거 기록이 흔들리지 않는지 ---- */
+{
+  check("항목 추가 후에도 과거 수요일 완주 보너스 유지", () => {
+    assert.equal(mainCount(state, "2026-09-16"), 6);       // 코어 추가 전 수요일 = 6개
+    assert.equal(isDayCleared(state, "2026-09-16"), true);
+  });
+  check("추가 후 수요일은 새 개수(7개)로 판정", () => assert.equal(mainCount(state, "2026-11-04"), 7));
+  check("인정 기준도 날짜에 따라 (9/16은 3개, 11/4는 4개)", () => {
+    assert.equal(halfCount(state, "2026-09-16"), 3);
+    assert.equal(halfCount(state, "2026-11-04"), 4);
   });
 }
 
